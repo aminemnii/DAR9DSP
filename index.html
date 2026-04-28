@@ -1,0 +1,3366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>FDE Amazon DSP – DAR9</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root{
+      --amazon-orange:#ff9900;--amazon-dark:#131921;--amazon-grey:#232f3e;
+      --bg:#f3f4f6;--card:#fff;--text:#111827;--muted:#6b7280;
+      --success:#16a34a;--danger:#dc2626;--info:#2563eb
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{background:linear-gradient(90deg,var(--amazon-dark),var(--amazon-grey));color:#fff;padding:18px 26px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;text-align:center}
+    header h1{margin:0;font-size:22px;letter-spacing:.2px}
+    header #hdr_sub{opacity:.95;font-weight:700}
+    header span{color:var(--amazon-orange)}
+    nav{background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(10px);display:flex;justify-content:center;padding:10px 14px;border-bottom:1px solid rgba(229,231,235,.9);flex-wrap:wrap;position:sticky;top:0;z-index:50}
+    .nav-inner{width:100%;max-width:1200px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;position:relative}
+    .nav-indicator{position:absolute;left:0;bottom:-2px;height:3px;width:0;background:var(--amazon-orange);border-radius:999px;transition:left .18s ease,width .18s ease;box-shadow:0 10px 20px rgba(255,153,0,.25);pointer-events:none;z-index:0}
+    nav{isolation:isolate;z-index:1000}
+    .nav-inner{z-index:1}
+    nav button{position:relative;z-index:2}
+    main{position:relative;z-index:1}
+
+    /* Dashboard premium tabs */
+    nav button{border:1px solid rgba(229,231,235,.9);background:rgba(243,244,246,.8);padding:10px 14px;border-radius:999px;font-weight:900;cursor:pointer;transition:transform .05s ease, box-shadow .15s ease, background .15s ease,border-color .15s ease}
+    nav button.active{background:#fff;border-color:rgba(255,153,0,.45);box-shadow:0 10px 20px rgba(0,0,0,.08)}
+    nav button:hover{background:#fff;box-shadow:0 12px 24px rgba(0,0,0,.10)}
+    nav button:active{transform:translateY(1px)}
+    main{padding:24px}
+    section{display:none}
+    section.active{display:block}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,.06);padding:20px;margin-bottom:24px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+    input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #d1d5db;font-size:14px}
+    textarea{resize:vertical}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{border:none;padding:12px 18px;border-radius:12px;font-weight:800;cursor:pointer}
+    .primary{background:var(--amazon-orange)}
+    .danger{background:var(--danger);color:#fff}
+    .info{background:var(--info);color:#fff}
+    table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border-radius:14px;overflow:hidden}
+    tbody tr:nth-child(odd){background:#fcfcfd}
+    tbody tr:hover{background:#fff7e6}
+    th,td{padding:12px;font-size:14px;vertical-align:top}
+    th{background:#f9fafb;text-align:left;white-space:nowrap}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:12px;padding:8px 10px}
+    .pill label{font-size:12px;color:var(--muted);font-weight:900}
+    .pill select,.pill input{border:none;background:transparent;padding:0;outline:none;font-weight:800}
+    th,td{padding:12px;font-size:14px;vertical-align:top}
+    th{background:#f9fafb;text-align:left;white-space:nowrap}
+    tr:not(:last-child){border-bottom:1px solid #e5e7eb}
+    td[contenteditable]{outline:none}
+    td[contenteditable]:focus{box-shadow:inset 0 0 0 2px rgba(255,153,0,.35);border-radius:8px}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:900}
+    .ok{background:#dcfce7;color:#166534}
+    .ko{background:#fee2e2;color:#991b1b}
+    .wait{background:#ffedd5;color:#9a3412}
+    .topbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    footer{text-align:center;padding:14px;color:var(--muted);font-size:13px}
+    .hint{margin-top:-8px;color:var(--muted)}
+
+    .section-shell{display:none}
+    .section-shell.active{display:block}
+    .module-hero{position:relative;overflow:hidden;border-radius:24px;padding:22px 24px;margin-bottom:18px;color:#fff;background:linear-gradient(135deg,#0f172a 0%, #18263a 48%, #25374d 100%);box-shadow:0 18px 42px rgba(15,23,42,.14)}
+    .module-hero::after{content:"";position:absolute;right:-80px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,153,0,.22),transparent 65%)}
+    .module-kicker{position:relative;z-index:1;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:rgba(255,255,255,.68)}
+    .module-title{position:relative;z-index:1;margin:8px 0 6px;font-size:30px;font-weight:1000}
+    .module-text{position:relative;z-index:1;margin:0;color:rgba(255,255,255,.84);font-size:15px;line-height:1.45;max-width:760px}
+    .module-chips{position:relative;z-index:1;display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .module-chip{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);min-width:150px}
+    .module-chip strong{display:block;font-size:24px;line-height:1.1;font-weight:1000;color:#fff}
+    .module-chip span{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.74);text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+    .module-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+    .card.soft{background:linear-gradient(180deg,#ffffff,#f9fbff);border:1px solid rgba(37,99,235,.08);box-shadow:0 12px 30px rgba(15,23,42,.06)}
+    .table-shell{background:linear-gradient(180deg,#ffffff,#fbfcfe);border:1px solid rgba(226,232,240,.95);border-radius:22px;padding:18px;box-shadow:0 14px 34px rgba(15,23,42,.06)}
+    .table-shell table{box-shadow:none;border-radius:16px;overflow:hidden}
+    .table-shell thead th{background:#eef2f7;color:#243244;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+    .table-shell tbody tr:hover{background:#f5f9ff}
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+    .stat-card{background:linear-gradient(135deg,#ffffff,#f8fbff);border:1px solid rgba(226,232,240,.9);border-radius:20px;padding:18px;box-shadow:0 12px 28px rgba(15,23,42,.06)}
+    .stat-card .label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:#64748b}
+    .stat-card .value{font-size:32px;font-weight:1000;line-height:1.1;margin-top:10px;color:#0f172a}
+    .stat-card .sub{font-size:14px;color:#475569;margin-top:6px}
+    .actions .btn{box-shadow:0 10px 18px rgba(15,23,42,.08)}
+    @media (max-width:700px){.module-title{font-size:24px}.module-hero{padding:18px}}
+
+    /* Home / dashboard premium */
+    body{
+      background:
+        radial-gradient(circle at left center, rgba(255,153,0,.14), transparent 22%),
+        radial-gradient(circle at right center, rgba(19,25,33,.10), transparent 20%),
+        var(--bg);
+    }
+    .home-hero{
+      position:relative;overflow:hidden;border-radius:28px;padding:34px;min-height:560px;
+      display:grid;grid-template-columns:1.15fr .95fr;gap:28px;
+      background:
+        radial-gradient(circle at 14% 16%, rgba(255,153,0,.22), transparent 26%),
+        radial-gradient(circle at 88% 14%, rgba(255,255,255,.10), transparent 17%),
+        linear-gradient(135deg,#0f172a 0%, #162235 45%, #24354a 100%);
+      box-shadow:0 24px 60px rgba(15,23,42,.20)
+    }
+    .home-hero::before,.home-hero::after{
+      content:"";position:absolute;top:40px;bottom:40px;width:16px;border-radius:999px;
+      background:linear-gradient(180deg,rgba(255,153,0,.92),rgba(255,153,0,.08))
+    }
+    .home-hero::before{left:-8px}
+    .home-hero::after{right:-8px}
+    .home-copy,.home-visual{position:relative;z-index:1}
+    .home-copy{display:flex;flex-direction:column;justify-content:center;color:#fff}
+    .home-badge{
+      display:inline-flex;align-self:flex-start;padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);
+      font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase
+    }
+    .home-title{font-size:52px;line-height:1.02;margin:18px 0 12px;font-weight:1000;max-width:760px}
+    .home-title span{color:var(--amazon-orange)}
+    .home-text{font-size:21px;line-height:1.5;color:rgba(255,255,255,.88);max-width:780px;margin:0}
+        .fleet-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:28px}
+    .fleet-card{
+      display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;
+      background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)
+    }
+    .fleet-card strong{display:block;font-size:16px}
+    .fleet-card span{display:block;color:rgba(255,255,255,.78);font-size:13px;margin-top:4px}
+    .fleet-icon{
+      width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.14);font-size:24px;flex:0 0 auto
+    }
+
+    .quick-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:18px}
+    .quick-link{display:flex;align-items:flex-start;gap:14px;padding:18px 18px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);cursor:pointer;transition:transform .15s ease, box-shadow .15s ease, background .15s ease}
+    .quick-link:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(0,0,0,.18);background:rgba(255,255,255,.11)}
+    .quick-link strong{display:block;font-size:16px;line-height:1.2;margin:0 0 6px 0}
+    .quick-link span{display:block;color:rgba(255,255,255,.82);font-size:14px;line-height:1.35}
+    .quick-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .qk{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14);flex:0 0 auto;font-size:22px}
+    .home-visual{display:flex;flex-direction:column;justify-content:center;gap:18px}
+    .brand-card{
+      min-height:230px;border-radius:30px;padding:26px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.10);position:relative;overflow:hidden;box-shadow:0 22px 40px rgba(0,0,0,.16)
+    }
+    .brand-card-hero{min-height:300px;padding:34px 34px 54px}.brand-main{font-size:68px;line-height:1}.brand-sub{font-size:20px}.brand-kicker{font-size:18px}.brand-card::before{
+      content:"";position:absolute;inset:auto -40px -36px -40px;height:92px;border-radius:999px;
+      background:linear-gradient(90deg,rgba(255,153,0,.95),rgba(255,196,66,.92));transform:rotate(-8deg);opacity:.92
+    }
+    .brand-card::after{
+      content:"";position:absolute;top:22px;right:24px;width:130px;height:130px;border-radius:999px;
+      background:radial-gradient(circle, rgba(255,153,0,.30), transparent 68%);
+      filter:blur(4px)
+    }
+    .brand-mark{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:10px;color:#fff}
+    .brand-kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;color:rgba(255,255,255,.68)}
+    .brand-main{font-size:54px;line-height:.9;font-weight:1000;letter-spacing:-.03em}
+    .brand-main .accent{color:var(--amazon-orange)}
+    .brand-sub{font-size:16px;font-weight:800;color:rgba(255,255,255,.86)}
+    .home-visual-note{padding:18px 20px;border-radius:22px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.86);font-size:15px;line-height:1.5}
+    .logo-panel,.truck-scene,.hero-card,.quick-card{
+      backdrop-filter:blur(12px)
+    }
+    .logo-panel,.truck-scene{
+      position:relative;padding:22px;display:grid;grid-template-columns:1fr;gap:14px;min-height:190px
+    }
+    .truck-scene::after{
+      content:"";position:absolute;left:20px;right:20px;bottom:30px;height:8px;border-radius:999px;
+      background:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.28),rgba(255,255,255,.12))
+    }
+    .truck{
+      position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:10px;padding:22px 16px;border-radius:22px;background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);color:#fff;text-align:center;box-shadow:0 18px 35px rgba(0,0,0,.12)
+    }
+    .truck span{font-size:54px;line-height:1}
+    .truck small{font-size:15px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.88)}
+    .single-scene{min-height:220px}
+    .truck-single{max-width:260px;justify-self:center;align-self:center}
+    .dashboard-shell{
+      background:linear-gradient(135deg,#0f172a 0%, #162235 46%, #22344a 100%);
+      border-radius:28px;padding:24px;color:#fff;box-shadow:0 24px 60px rgba(15,23,42,.16);max-width:1220px;margin:0 auto
+    }
+    .dashboard-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap}
+    .dashboard-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:rgba(255,255,255,.7)}
+    .dashboard-title{font-size:30px;margin:6px 0 8px}
+    .dashboard-text{margin:0;color:rgba(255,255,255,.82);max-width:640px;font-size:15px;line-height:1.4}
+    .dashboard-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .dash-card,.dashboard-panel{
+      background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px
+    }
+    .dash-card.accent{background:linear-gradient(135deg,rgba(255,153,0,.18),rgba(255,255,255,.10))}
+    .dash-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:rgba(255,255,255,.72)}
+    .dash-value{font-size:34px;font-weight:1000;line-height:1;margin:12px 0 8px}
+    .dash-sub,.panel-sub{color:rgba(255,255,255,.82);font-size:14px;line-height:1.45}
+    .dashboard-panels{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .panel-value{font-size:24px;font-weight:1000;line-height:1.15;margin:12px 0 6px}
+    .hero-side{display:grid;gap:18px}
+    .quick-value{font-size:34px;font-weight:1000;line-height:1.1;margin:16px 0 12px;color:#fff}
+    @media (max-width:1100px){
+      .home-hero,.hero{grid-template-columns:1fr}
+      .home-title{font-size:42px}
+      .fleet-strip,.dashboard-grid,.dashboard-panels{grid-template-columns:1fr}
+      .truck-md,.truck-sm{transform:none}
+    }
+    @media (max-width:700px){
+      .home-hero,.hero-card{padding:24px}
+      .home-title{font-size:34px}
+      .home-text{font-size:17px}
+    }
+
+
+    /* --- ARC photos upload (clean UI) --- */
+    input[type="file"]{display:none}
+    .filebox{border:1px dashed #d1d5db;border-radius:14px;padding:12px 12px;background:#fafafa}
+    .filebox .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .filebox .title{font-weight:900}
+    .filebox .meta{color:var(--muted);font-size:12px;margin-top:6px}
+    .filebtn{display:inline-block;background:var(--amazon-orange);padding:10px 12px;border-radius:10px;font-weight:900;cursor:pointer;white-space:nowrap}
+    .thumbs{display:flex;gap:6px;flex-wrap:wrap}
+    .thumb{position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .thumb .x{position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;cursor:pointer}
+
+    /* --- QR Label --- */
+    #labelWrap{display:flex;justify-content:center}
+    .label{
+      width:var(--label-w,140mm);
+      height:var(--label-h,55mm);
+      background:#fff;
+      border:4px solid #111;
+      border-radius:0;
+      display:flex;
+      padding:10px;
+      gap:0;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .labelLeft{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;padding-right:10px}
+    .labelHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .labelHeader .dsp{font-weight:1000}
+    .labelLine{font-size:18px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .labelLine .k{font-weight:700}
+    .labelLine .v{font-weight:1000}
+    .labelDivider{width:4px;background:#111}
+    .labelRight{flex:0 0 38%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-left:10px}
+    .qrHint{font-size:14px;color:#111;font-weight:900}
+    .redtagBadge{margin-top:10px;background:var(--danger);color:#fff;font-weight:1000;border-radius:0;padding:6px 10px;display:inline-flex;align-self:flex-start}
+
+    /* --- A4 sheet (8 labels) --- */
+    .sheet{width:210mm;height:297mm;background:#fff;padding:10mm}
+    .sheetHeader{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6mm}
+    .sheetTitle{font-weight:1000;font-size:16px}
+    .sheetMeta{color:#374151;font-size:12px}
+    .sheetGrid{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(4,auto);gap:6mm}
+    .sheetLabel{border:3px solid #111;padding:8px;display:flex;gap:0;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#fff}
+    .sheetLabel .labelLeft{padding-right:8px;gap:4px}
+    .sheetLabel .labelDivider{width:3px}
+    .sheetLabel .labelLine{font-size:14px}
+    .sheetLabel .redtagBadge{padding:4px 8px;margin-top:6px}
+
+    @media print{
+      body *{visibility:hidden}
+      header,nav,footer{display:none !important}
+      /* Default: print single label */
+      #labelWrap, #labelWrap *{visibility:visible}
+      #labelWrap{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+      .label{box-shadow:none}
+
+      /* If printing sheet */
+      body.print-sheet #labelWrap{display:none !important}
+      body.print-sheet #sheetWrap, body.print-sheet #sheetWrap *{visibility:visible}
+      body.print-sheet #sheetWrap{display:block}
+      body.print-sheet #sheetWrap{position:fixed;left:0;top:0;width:100%;height:100%}
+    }
+
+@media print{
+      body *{visibility:hidden}
+      header,nav,footer{display:none !important}
+      #labelWrap, #labelWrap *{visibility:visible}
+      #labelWrap{position:fixed;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+      .label{box-shadow:none}
+    }
+  
+    .reminder-shell{display:grid;grid-template-columns:minmax(0,1.2fr) 340px;gap:18px;align-items:start}
+    .reminder-list{display:grid;gap:14px}
+    .reminder-list-wrap{min-width:0}
+    .reminder-card{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:18px;color:#fff;box-shadow:0 14px 28px rgba(0,0,0,.12)}
+    .reminder-card h3{margin:10px 0 8px;font-size:22px}
+    .reminder-card p{margin:0;color:rgba(255,255,255,.86);line-height:1.5}
+    .reminder-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .reminder-pill{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:800;letter-spacing:.03em}
+    .reminder-badge{display:inline-flex;align-items:center;align-self:flex-start;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+    .reminder-badge.high{background:#7f1d1d;color:#fee2e2}
+    .reminder-badge.normal{background:#78350f;color:#fef3c7}
+    .reminder-badge.low{background:#164e63;color:#cffafe}
+    .reminder-badge.ok{background:#166534;color:#dcfce7}
+    .reminder-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .metric-stack{display:grid;gap:14px}
+    .metric-box,.clean-note{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;color:#fff}
+    .metric-box .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:rgba(255,255,255,.7)}
+    .metric-box .v{font-size:34px;font-weight:1000;line-height:1.1;margin:10px 0 6px}
+    .metric-box .s{color:rgba(255,255,255,.78);font-size:14px;line-height:1.4}
+    @media (max-width:980px){.reminder-shell{grid-template-columns:1fr}}
+
+    .brand-card-xl{min-height:320px;display:flex;align-items:center;justify-content:center}
+    .brand-card-xl .brand-mark{transform:scale(1.28);transform-origin:center}
+    .large-brand-note{margin-top:22px;min-height:0}
+    .dashboard-panels.full-only{grid-template-columns:1fr}
+    .dashboard-panel.full-span{grid-column:1/-1}
+    .stats-shell .dashboard-grid{margin-bottom:20px}
+    .stats-grid-modern .dash-card{min-height:170px}
+
+
+
+    /* --- Onglet Suivi BU intégré --- */
+    .embedded-tool-frame{width:100%;min-height:calc(100vh - 150px);border:0;border-radius:24px;box-shadow:0 18px 42px rgba(15,23,42,.14);background:#0b1020;overflow:hidden}
+    .embedded-tool-note{margin:0 0 14px;color:#6b7280;font-size:13px;font-weight:700}
+
+  
+
+/* === Suivi BU — V3 propre et personnalisable === */
+.bu-scope{
+  --bu-ink:#0f172a;--bu-muted:#64748b;--bu-line:#e2e8f0;--bu-soft:#f8fafc;
+  --bu-card:#ffffff;--bu-orange:#ff9900;--bu-orange2:#f97316;--bu-blue:#2563eb;
+  --bu-danger:#dc2626;--bu-warn:#f59e0b;--bu-ok:#16a34a;--bu-navy:#0b1220;
+  display:block;color:var(--bu-ink);background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%);
+  border:1px solid rgba(226,232,240,.95);border-radius:26px;padding:24px;box-shadow:0 18px 45px rgba(15,23,42,.08);
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+.bu-scope *{box-sizing:border-box}.bu-scope section{display:block!important}.bu-scope .hide{display:none!important}.bu-scope .container{max-width:none;margin:0;padding:0}
+.bu-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid var(--bu-line);border-radius:22px;padding:20px 22px;margin-bottom:18px;box-shadow:0 12px 30px rgba(15,23,42,.06)}
+.bu-titleblock h1{margin:0;font-size:24px;line-height:1.15;font-weight:1000;color:#0f172a}.bu-titleblock p{margin:7px 0 0;color:#475569;font-size:14px;line-height:1.45}.bu-top-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bu-filterbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:18px}.bu-filter{background:#fff;border:1px solid var(--bu-line);border-radius:16px;padding:10px 12px;min-width:160px;box-shadow:0 8px 18px rgba(15,23,42,.04)}.bu-filter label{display:block;font-size:11px;font-weight:1000;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:6px}.bu-filter select,.bu-filter input{width:100%;border:0!important;background:transparent!important;outline:none!important;padding:0!important;height:24px!important;color:#0f172a!important;font-weight:800;font-size:14px!important;box-shadow:none!important}
+.bu-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:18px}.bu-kpi{background:#fff;border:1px solid var(--bu-line);border-radius:20px;padding:16px;box-shadow:0 10px 24px rgba(15,23,42,.05);min-height:118px}.bu-kpi small{display:block;color:#64748b;font-size:11px;font-weight:1000;text-transform:uppercase;letter-spacing:.06em}.bu-kpi strong{display:block;font-size:34px;line-height:1;margin:12px 0 7px;color:#0f172a;font-weight:1000}.bu-kpi .sub{color:#64748b;font-size:13px;line-height:1.3}.bu-kpi.warn strong{color:var(--bu-warn)}.bu-kpi.danger strong{color:var(--bu-danger)}.bu-kpi.ok strong{color:var(--bu-ok)}
+.bu-main-grid{display:grid;grid-template-columns:minmax(320px,.95fr) minmax(340px,.9fr) minmax(360px,1fr);gap:18px;align-items:start}.bu-wide{grid-column:1/-1}.bu-card{background:#fff;border:1px solid var(--bu-line);border-radius:22px;padding:20px;box-shadow:0 14px 34px rgba(15,23,42,.06);overflow:hidden}.bu-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.bu-card-title{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:1000;color:#0f172a}.bu-icon{width:32px;height:32px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:#fff7ed;color:#ea580c;border:1px solid #fed7aa;font-size:18px;flex:0 0 auto}
+.bu-form{display:grid;gap:14px}.bu-field label{display:block;font-size:12px;color:#475569;text-transform:uppercase;letter-spacing:.04em;font-weight:1000;margin-bottom:8px}.bu-field input,.bu-field select,.bu-field textarea{width:100%!important;min-height:46px!important;height:auto!important;border:1px solid #cbd5e1!important;border-radius:14px!important;background:#fff!important;color:#0f172a!important;padding:12px 14px!important;font-size:14px!important;font-weight:700!important;outline:none!important;box-shadow:none!important;resize:vertical}.bu-field textarea{min-height:82px!important;max-height:140px!important;line-height:1.35}.bu-field input:focus,.bu-field select:focus,.bu-field textarea:focus{border-color:var(--bu-orange)!important;box-shadow:0 0 0 4px rgba(255,153,0,.15)!important}.bu-hint{display:flex;justify-content:space-between;gap:10px;margin-top:6px;color:#64748b;font-size:12px}.bu-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bu-btn{appearance:none;border:1px solid transparent;border-radius:14px;padding:12px 16px;font-weight:1000;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s ease;background:#f8fafc;color:#0f172a;min-height:46px}.bu-btn:hover{transform:translateY(-1px);box-shadow:0 10px 20px rgba(15,23,42,.08)}.bu-btn.primary{background:linear-gradient(135deg,var(--bu-orange),var(--bu-orange2));color:#111;border-color:rgba(255,153,0,.35);box-shadow:0 10px 20px rgba(255,153,0,.24)}.bu-btn.secondary{background:#fff;border-color:#cbd5e1;color:#0f172a}.bu-btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}.bu-btn.dark{background:#0f172a;color:#fff;border-color:#0f172a}.bu-actions{display:flex;gap:10px;flex-wrap:wrap}.bu-actions .bu-btn{flex:1}.bu-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bu-alert{padding:16px 18px;border-radius:18px;background:#fff7ed;border:1px solid #fed7aa;color:#8a3a0d;font-weight:900;line-height:1.45;margin-bottom:16px}.bu-alert.danger{background:#fef2f2;border-color:#fecaca;color:#991b1b}.bu-empty{padding:18px;border:1px dashed #cbd5e1;border-radius:18px;color:#64748b;text-align:center;background:#f8fafc}.bu-sanction-list{display:grid;gap:12px}.bu-sanction-card{border:1px solid #fecaca;background:linear-gradient(180deg,#fff,#fff7f7);border-left:5px solid var(--bu-danger);border-radius:18px;padding:14px}.bu-sanction-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.bu-sanction-name{font-weight:1000;color:#0f172a;font-size:16px}.bu-sanction-meta{color:#64748b;font-size:13px;line-height:1.4;margin-top:4px}.bu-sanction-edit{display:grid;gap:8px;margin-top:12px}.bu-sanction-edit select,.bu-sanction-edit input{width:100%!important;border:1px solid #cbd5e1!important;border-radius:12px!important;padding:10px 12px!important;height:42px!important;background:#fff!important;color:#0f172a!important;font-weight:800!important}
+.bu-report{white-space:pre-wrap;background:radial-gradient(circle at top right,rgba(255,153,0,.10),transparent 28%),linear-gradient(135deg,#0b1220,#14213a);color:#fff;border-radius:20px;padding:18px;line-height:1.55;font-size:14px;min-height:186px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}.bu-note{display:flex;gap:10px;align-items:flex-start;background:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;padding:13px 14px;color:#1e3a8a;font-size:13px;line-height:1.4;margin:14px 0}.bu-tabs{display:flex;gap:10px;flex-wrap:wrap}.bu-tab.active{background:#fff7ed;color:#c2410c;border-color:#fdba74}.bu-panel-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}.bu-ranking{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.bu-rank-card{position:relative;border:1px solid var(--bu-line);background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04);overflow:hidden}.bu-rank-card.danger{border-color:#fecaca;border-left:5px solid var(--bu-danger)}.bu-rank-card.warn{border-color:#fed7aa;border-left:5px solid var(--bu-warn)}.bu-rank-card.ok{border-left:5px solid var(--bu-ok)}.bu-rank-count{position:absolute;right:16px;top:14px;font-size:36px;font-weight:1000;line-height:1;color:#0f172a;opacity:.94}.bu-rank-name{font-size:17px;font-weight:1000;color:#0f172a;padding-right:60px}.bu-rank-meta{font-size:13px;color:#64748b;line-height:1.45;margin-top:8px}.bu-badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.bu-badge{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:1000;border:1px solid transparent}.bu-badge.ok{background:#dcfce7;color:#166534;border-color:#bbf7d0}.bu-badge.warn{background:#fff7ed;color:#9a3412;border-color:#fed7aa}.bu-badge.danger{background:#fee2e2;color:#991b1b;border-color:#fecaca}.bu-badge.neutral{background:#f1f5f9;color:#475569;border-color:#e2e8f0}.bu-week{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f8fafc;border:1px solid #e2e8f0;font-size:11px;font-weight:900;color:#64748b}.bu-table-wrap{overflow:auto;border:1px solid var(--bu-line);border-radius:18px;background:#fff}.bu-scope table{width:100%;border-collapse:collapse;min-width:900px;background:#fff}.bu-scope th,.bu-scope td{padding:13px 14px;text-align:left;border-bottom:1px solid #eef2f7;font-size:13px;color:#0f172a}.bu-scope th{background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:1000;position:sticky;top:0}.bu-scope tr:hover td{background:#fff7ed}.bu-settings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.bu-settings .bu-field input,.bu-settings .bu-field select{min-height:42px!important;padding:10px 12px!important}.bu-summary-line{display:grid;grid-template-columns:1fr auto;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12)}.bu-summary-line:last-child{border-bottom:0}
+[data-theme="dark"] .bu-scope{background:linear-gradient(180deg,#0b1220,#0f172a);border-color:rgba(255,255,255,.08);color:#e6edf7}.bu-scope[data-force-dark="1"]{background:linear-gradient(180deg,#0b1220,#0f172a);color:#e6edf7}
+[data-theme="dark"] .bu-topbar,[data-theme="dark"] .bu-card,[data-theme="dark"] .bu-filter,[data-theme="dark"] .bu-kpi,[data-theme="dark"] .bu-rank-card,[data-theme="dark"] .bu-table-wrap{background:#111a2e;border-color:rgba(255,255,255,.08);color:#e6edf7}
+[data-theme="dark"] .bu-titleblock h1,[data-theme="dark"] .bu-card-title,[data-theme="dark"] .bu-kpi strong,[data-theme="dark"] .bu-rank-name,[data-theme="dark"] .bu-scope td,[data-theme="dark"] .bu-filter input,[data-theme="dark"] .bu-filter select{color:#fff!important}
+[data-theme="dark"] .bu-titleblock p,[data-theme="dark"] .bu-kpi .sub,[data-theme="dark"] .bu-filter label,[data-theme="dark"] .bu-rank-meta{color:#9ab0d3}
+[data-theme="dark"] .bu-field input,[data-theme="dark"] .bu-field select,[data-theme="dark"] .bu-field textarea,[data-theme="dark"] .bu-sanction-edit select,[data-theme="dark"] .bu-sanction-edit input{background:#0f1a2e!important;color:#e6edf7!important;border-color:rgba(255,255,255,.12)!important}
+[data-theme="dark"] .bu-scope table,[data-theme="dark"] .bu-scope th{background:#0f1a2e!important;color:#9ab0d3!important;border-color:rgba(255,255,255,.08)}
+
+.bu-helper-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.bu-helper-sub{margin:4px 0 0;color:#64748b;font-size:13px;line-height:1.4}.bu-helper-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.bu-helper-card{position:relative;border:1px solid var(--bu-line);background:linear-gradient(180deg,#fff,#fbfdff);border-radius:18px;padding:16px;box-shadow:0 8px 18px rgba(15,23,42,.04);overflow:hidden}.bu-helper-count{position:absolute;right:16px;top:14px;font-size:36px;font-weight:1000;line-height:1;color:#2563eb;opacity:.95}.bu-helper-name{font-size:17px;font-weight:1000;color:#0f172a;padding-right:66px}.bu-helper-meta{margin-top:10px;color:#64748b;font-size:13px;line-height:1.45}.bu-helper-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.bu-helper-mini{border:1px solid #e2e8f0;background:#f8fafc;border-radius:14px;padding:10px;text-align:center}.bu-helper-mini strong{display:block;font-size:22px;line-height:1;color:#0f172a;font-weight:1000}.bu-helper-mini span{display:block;margin-top:4px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:1000}.bu-helper-card.top{border-color:#bfdbfe;border-left:5px solid #2563eb}.bu-helper-empty{padding:18px;border:1px dashed #cbd5e1;border-radius:18px;color:#64748b;text-align:center;background:#f8fafc}
+[data-theme="dark"] .bu-helper-card{background:#111a2e;border-color:rgba(255,255,255,.08)}[data-theme="dark"] .bu-helper-name,[data-theme="dark"] .bu-helper-mini strong{color:#fff}[data-theme="dark"] .bu-helper-mini{background:#0f1a2e;border-color:rgba(255,255,255,.08)}[data-theme="dark"] .bu-helper-meta,[data-theme="dark"] .bu-helper-sub{color:#9ab0d3}
+
+@media(max-width:1200px){.bu-main-grid{grid-template-columns:1fr 1fr}.bu-main-grid>.bu-card:nth-child(3){grid-column:1/-1}.bu-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:820px){.bu-scope{padding:14px;border-radius:20px}.bu-main-grid,.bu-row2,.bu-settings{grid-template-columns:1fr}.bu-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.bu-filter{min-width:calc(50% - 5px);flex:1}.bu-topbar{padding:16px}.bu-actions .bu-btn{flex:1 1 100%}}
+@media(max-width:520px){.bu-kpis{grid-template-columns:1fr}.bu-filter{min-width:100%}.bu-titleblock h1{font-size:21px}}
+/* === Fin Suivi BU === */
+
+
+/* === Améliorations 2026 — UX, mobile, animations === */
+:root{
+  --shadow-soft: 0 10px 28px rgba(15,23,42,.08);
+  --shadow-pop:  0 18px 38px rgba(15,23,42,.16);
+  --easing: cubic-bezier(.21,.61,.35,1);
+  --radius-card: 18px;
+  --radius-pill: 999px;
+}
+[data-theme="dark"]{
+  --bg:#0b1220;
+  --card:#111a2e;
+  --text:#e6edf7;
+  --muted:#9ab0d3;
+}
+[data-theme="dark"] body{
+  background:
+    radial-gradient(circle at left center, rgba(255,153,0,.10), transparent 22%),
+    radial-gradient(circle at right center, rgba(60,80,140,.16), transparent 22%),
+    var(--bg) !important;
+  color: var(--text);
+}
+[data-theme="dark"] nav{background:rgba(20,28,46,.78)}
+[data-theme="dark"] nav button{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);color:#e6edf7}
+[data-theme="dark"] nav button.active{background:#0f1a2e;border-color:rgba(255,153,0,.5)}
+[data-theme="dark"] .card{background:var(--card);color:var(--text);box-shadow:0 12px 28px rgba(0,0,0,.30)}
+[data-theme="dark"] .card.soft{background:linear-gradient(180deg,#0f1a2e,#0b1322);border-color:rgba(255,255,255,.06)}
+[data-theme="dark"] th{background:#0f1a2e;color:#9ab0d3}
+[data-theme="dark"] td[contenteditable]:focus{box-shadow:inset 0 0 0 2px rgba(255,153,0,.45)}
+[data-theme="dark"] tbody tr:nth-child(odd){background:rgba(255,255,255,.02)}
+[data-theme="dark"] tbody tr:hover{background:rgba(255,153,0,.06)}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{
+  background:#0f1a2e;color:var(--text);border-color:rgba(255,255,255,.1)
+}
+
+/* Header polish */
+header{position:relative}
+header .theme-toggle{
+  position:absolute;top:14px;right:18px;display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);color:#fff;font-weight:800;font-size:13px;cursor:pointer;
+  transition:.2s var(--easing)
+}
+header .theme-toggle:hover{background:rgba(255,255,255,.12);transform:translateY(-1px)}
+header .theme-toggle svg{width:16px;height:16px}
+
+/* Section entrance animation */
+section.section-shell{animation:none}
+section.section-shell.active{animation: secEnter .35s var(--easing) both}
+@keyframes secEnter{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Toast notifications */
+.toast-stack{
+  position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:10px;
+  z-index:9999;pointer-events:none
+}
+.toast{
+  pointer-events:auto;min-width:260px;max-width:380px;padding:14px 16px;border-radius:14px;
+  background:#111a2e;color:#fff;box-shadow:0 16px 38px rgba(0,0,0,.30);
+  display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;
+  border-left:4px solid #ff9900;
+  transform:translateX(110%);opacity:0;transition:.28s var(--easing)
+}
+.toast.show{transform:translateX(0);opacity:1}
+.toast.ok{border-left-color:#16a34a}
+.toast.err{border-left-color:#dc2626}
+.toast.info{border-left-color:#2563eb}
+
+/* Search modal */
+.search-overlay{
+  position:fixed;inset:0;z-index:10000;display:none;align-items:flex-start;justify-content:center;
+  padding-top:12vh;background:rgba(8,14,28,.55);backdrop-filter:blur(6px)
+}
+.search-overlay.show{display:flex}
+.search-box{
+  width:min(680px,92vw);background:#fff;border-radius:18px;box-shadow:0 30px 60px rgba(0,0,0,.30);
+  overflow:hidden
+}
+[data-theme="dark"] .search-box{background:#0f1a2e;color:#e6edf7}
+.search-input{
+  width:100%;padding:18px 22px;font-size:18px;font-weight:700;border:0;outline:none;background:transparent;color:inherit
+}
+.search-results{max-height:50vh;overflow:auto;border-top:1px solid rgba(0,0,0,.06)}
+[data-theme="dark"] .search-results{border-top-color:rgba(255,255,255,.06)}
+.search-item{display:flex;justify-content:space-between;gap:12px;padding:12px 22px;cursor:pointer;border-top:1px solid rgba(0,0,0,.04)}
+[data-theme="dark"] .search-item{border-top-color:rgba(255,255,255,.04)}
+.search-item:hover, .search-item.focus{background:rgba(255,153,0,.10)}
+.search-item small{color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:11px}
+.search-hint{padding:10px 22px;color:#6b7280;font-size:12px;display:flex;justify-content:space-between;gap:8px;border-top:1px solid rgba(0,0,0,.06)}
+[data-theme="dark"] .search-hint{color:#9ab0d3;border-top-color:rgba(255,255,255,.06)}
+kbd{display:inline-block;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.06);font-size:11px;font-weight:700;font-family:inherit}
+[data-theme="dark"] kbd{background:rgba(255,255,255,.10)}
+
+/* Mobile nav: scroll horizontal smooth */
+@media (max-width: 900px){
+  nav .nav-inner{
+    flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;justify-content:flex-start;padding:4px 0
+  }
+  nav .nav-inner::-webkit-scrollbar{display:none}
+  nav button{flex:0 0 auto;scroll-snap-align:start}
+  header h1{font-size:18px}
+  header .theme-toggle{position:static;margin-top:8px}
+}
+@media (max-width: 700px){
+  main{padding:14px}
+  .card{padding:16px}
+  .home-hero{grid-template-columns:1fr;padding:22px;min-height:auto}
+  .home-title{font-size:34px}
+  .home-text{font-size:16px}
+  .fleet-strip{grid-template-columns:1fr}
+  .quick-links{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:1fr 1fr}
+  .module-title{font-size:22px}
+  .module-hero{padding:18px}
+  .actions{gap:8px}
+  .actions .btn{flex:1;min-width:0}
+}
+
+/* Subtle hover micro-interactions */
+.btn{transition:transform .12s var(--easing), box-shadow .15s var(--easing), filter .15s var(--easing)}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+.btn:active{transform:translateY(0)}
+.card{transition:box-shadow .25s var(--easing), transform .25s var(--easing)}
+nav button{transition:transform .1s var(--easing), box-shadow .15s var(--easing), background .15s var(--easing)}
+
+/* Footer polish */
+footer{padding:20px 14px;display:flex;justify-content:center;gap:14px;align-items:center;flex-wrap:wrap}
+#syncBadge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.05)}
+[data-theme="dark"] #syncBadge{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08);color:#9ab0d3}
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
+
+/* === Fin améliorations 2026 === */
+
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="hdr_title">FDE <span>Amazon DSP DAR9</span></h1>
+    <div id="hdr_sub">Accueil • Dashboard • ARC / ECR • BU • POOL • Onboarding • QR Codes</div>
+  </header>
+
+  <nav>
+    <div class="nav-inner">
+      <button type="button" class="active" data-tab="home" onclick="showTab('home',this)">ACCUEIL</button>
+      <button type="button" data-tab="dashboard" onclick="showTab('dashboard',this)">DASHBOARD</button>
+      <button type="button" data-tab="reminders" onclick="showTab('reminders',this)">RAPPELS</button>
+      <button type="button" data-tab="arc" onclick="showTab('arc',this)">ARC / ECR</button>
+      <button type="button" data-tab="suivi_bu" onclick="showTab('suivi_bu',this)">SUIVI BU</button>
+      <button type="button" data-tab="qrcode" onclick="showTab('qrcode',this)">QRCODE</button>
+      <button type="button" data-tab="pool" onclick="showTab('pool',this)">POOL</button>
+      <button type="button" data-tab="drivers" onclick="showTab('drivers',this)">BASE CHAUFFEURS</button>
+      <button type="button" data-tab="onboarding" onclick="showTab('onboarding',this)">ONBOARDING</button>
+      <button type="button" data-tab="stats" onclick="showTab('stats',this)">STATS</button>
+      <button type="button" data-tab="history" onclick="showTab('history',this)">HISTORIQUE</button>
+      <button type="button" data-tab="settings" onclick="showTab('settings',this)">PARAMÈTRES</button>
+      <div class="nav-indicator" id="navIndicator"></div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="home" class="section-shell active">
+      <div class="home-hero">
+        <div class="home-copy">
+          <div class="home-badge">Plateforme interne DAR9</div>
+          <h2 class="home-title">DAR 9 DISPATCHER <span>FDE DISTRIBUTION</span></h2>
+          <p class="home-text">Gestion centralisée des ARC / ECR, du pool, de l'onboarding, de la base chauffeurs et des QR codes.</p>
+          <div class="fleet-strip">
+            <div class="fleet-card"><div class="fleet-icon">🚐</div><div><strong>Utilitaire et flotte route</strong><span>Suivi de l'activité transport DAR9</span></div></div>
+            <div class="fleet-card"><div class="fleet-icon">📦</div><div><strong>Dispatch, QR codes et suivi interne</strong><span>Pilotage centralisé des opérations quotidiennes</span></div></div>
+            <div class="fleet-card"><div class="fleet-icon">👤</div><div><strong>Onboarding et base chauffeurs</strong><span>Gestion rapide des profils et des statuts</span></div></div>
+          </div>
+          <div class="quick-links">
+            <div class="quick-link" onclick="goTab('dashboard')"><div class="qk">📊</div><div class="quick-copy"><strong>Dashboard</strong><span>Vue d'ensemble en direct avec indicateurs et alertes.</span></div></div>
+            <div class="quick-link" onclick="goTab('arc')"><div class="qk">🧾</div><div class="quick-copy"><strong>ARC / ECR</strong><span>Suivi des réclamations avec filtres rapides par sous-traitant.</span></div></div>
+            <div class="quick-link" onclick="goTab('pool')"><div class="qk">🚚</div><div class="quick-copy"><strong>Pool & exploitation</strong><span>Accès direct au pool, à l'onboarding et à la base chauffeurs.</span></div></div>
+          </div>
+        </div>
+        <div class="home-visual">
+          <div class="brand-card brand-card-xl brand-card-hero">
+            <div class="brand-mark">
+              <div class="brand-kicker">Amazon DSP • DAR9</div>
+              <div class="brand-main">DAR9 <span class="accent">FDE</span></div>
+              <div class="brand-sub">Dispatch • Exploitation • Suivi opérationnel</div>
+            </div>
+          </div>
+          <div class="home-visual-note large-brand-note">Navigation rapide, indicateurs synchronisés en direct et modules harmonisés sur toute la plateforme.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboard" class="section-shell">
+      <div class="dashboard-shell">
+        <div class="dashboard-head">
+          <div>
+            <div class="dashboard-kicker">Vue d'ensemble en direct</div>
+            <h2 class="dashboard-title">Dashboard DAR9</h2>
+            <p class="dashboard-text">Tous les indicateurs se mettent à jour automatiquement à chaque ajout, modification ou suppression dans ARC, Pool, onboarding, base chauffeurs et QR codes.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));">
+          <div class="dash-card accent"><div class="dash-label">ARC total</div><div class="dash-value" id="ov_arc">0</div><div class="dash-sub">Réclamations enregistrées</div></div>
+          <div class="dash-card"><div class="dash-label">ARC en attente</div><div class="dash-value" id="ov_arc_wait">0</div><div class="dash-sub">Dossiers à traiter</div></div>
+          <div class="dash-card"><div class="dash-label">Pool</div><div class="dash-value" id="ov_pool">0</div><div class="dash-sub">Chauffeurs dans le pool</div></div>
+          <div class="dash-card"><div class="dash-label">Onboarding</div><div class="dash-value" id="ov_onboarding">0</div><div class="dash-sub">Suivis enregistrés</div></div>
+          <div class="dash-card"><div class="dash-label">Base chauffeurs</div><div class="dash-value" id="ov_drivers">0</div><div class="dash-sub">Profils actifs dans la base</div></div>
+          <div class="dash-card"><div class="dash-label">QR codes</div><div class="dash-value" id="ov_labels">0</div><div class="dash-sub">Étiquettes en historique</div></div>
+        </div>
+
+        <div class="dashboard-panels">
+          <div class="dashboard-panel">
+            <div class="dash-label">Sous-traitant le plus présent</div>
+            <div class="panel-value" id="ov_top_sst">—<small id="ov_top_sst_count">0 occurrence</small></div>
+            <div class="panel-sub">Calcul automatique à partir des données ARC, Pool, onboarding et base chauffeurs.</div>
+          </div>
+          <div class="dashboard-panel">
+            <div class="dash-label">État du jour</div>
+            <div class="panel-value" id="ov_health">RAS</div>
+            <div class="panel-sub" id="ov_tip">Vue rapide des points qui demandent une attention immédiate.</div>
+          </div>
+        </div>
+
+        <div class="dashboard-panels bottom full-only">
+          <div class="dashboard-panel full-span">
+            <div class="dash-label">Activité récente</div>
+            <div class="recent-list" id="dash_recent">
+              <div class="recent-item"><strong>Aucune activité récente</strong><span>Les prochaines modifications apparaîtront ici.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reminders" class="section-shell">
+      <div class="dashboard-shell">
+        <div class="dashboard-head">
+          <div>
+            <div class="dashboard-kicker">Suivi manuel des tâches</div>
+            <h2 class="dashboard-title">Rappels DAR9</h2>
+            <p class="dashboard-text">Ajoute ici tes rappels manuellement. Cette page ne dépend plus des ARC, du pool ou de l'onboarding.</p>
+          </div>
+        </div>
+        <div class="reminder-shell">
+          <div class="reminder-list-wrap">
+            <div class="card soft" style="margin-bottom:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;box-shadow:none;">
+              <h3 style="margin-top:0;color:#fff">Ajouter un rappel</h3>
+              <div class="grid">
+                <input id="manual_rem_title" placeholder="Titre du rappel" />
+                <select id="manual_rem_priority">
+                  <option value="Haute">Priorité : Haute</option>
+                  <option value="Normale" selected>Priorité : Normale</option>
+                  <option value="Basse">Priorité : Basse</option>
+                </select>
+                <input id="manual_rem_owner" placeholder="Chauffeur / DA / sous-traitant concerné" />
+                <input id="manual_rem_deadline" type="date" />
+              </div>
+              <textarea id="manual_rem_note" placeholder="Détail de la tâche à faire" rows="4" style="margin-top:14px"></textarea>
+              <div class="actions">
+                <button class="btn primary" type="button" onclick="addManualReminder()">Ajouter</button>
+                <button class="btn info" type="button" onclick="clearManualReminderForm()">Reset</button>
+              </div>
+            </div>
+            <div class="reminder-list" id="reminder_list">
+              <div class="reminder-card"><div class="reminder-badge ok">RAS</div><h3>Aucun rappel</h3><p>Ajoute un rappel manuel pour commencer ton suivi.</p></div>
+            </div>
+          </div>
+          <div class="reminder-side">
+            <div class="metric-stack">
+              <div class="metric-box"><div class="k">Rappels ouverts</div><div class="v" id="rem_total_count">0</div><div class="s">Tâches encore à faire</div></div>
+              <div class="metric-box"><div class="k">Priorité haute</div><div class="v" id="rem_high_count">0</div><div class="s">À traiter rapidement</div></div>
+              <div class="metric-box"><div class="k">Prochain rappel</div><div class="v" id="rem_next_title" style="font-size:20px;line-height:1.2">—</div><div class="s">Premier rappel actif</div></div>
+              <div class="metric-box"><div class="k">Échéance</div><div class="v" id="rem_next_date" style="font-size:20px;line-height:1.2">—</div><div class="s">Date prévue</div></div>
+            </div>
+            <div class="clean-note">
+              <div class="dash-label">Mode manuel</div>
+              <p id="rem_rule" style="margin:10px 0 0;color:rgba(255,255,255,.86);line-height:1.5">Les rappels de cette page sont indépendants du reste du site. Tu peux les ajouter, les cocher et les supprimer quand tu veux.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="arc" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Réclamations clients</div>
+        <div class="module-title">ARC / ECR</div>
+        <p class="module-text">Saisie, suivi, statut et pièces jointes, avec filtres rapides par DA, tracking, sous-traitant et statut.</p>
+        <div class="module-chips">
+          <div class="module-chip"><strong id="arc_live_total">0</strong><span>Total ARC</span></div>
+          <div class="module-chip"><strong id="arc_live_wait">0</strong><span>En attente</span></div>
+          <div class="module-chip"><strong id="arc_live_ok">0</strong><span>Clôturés</span></div>
+        </div>
+      </div>
+      <div class="card soft">
+        <h2>Réclamation ARC / ECR – DAR9</h2>
+        <div class="grid">
+          <input id="arc_da" placeholder="Nom & Prénom DA" />
+          <input id="arc_tracking" placeholder="Tracking ID" />
+          <input id="arc_sst" placeholder="SST" />
+          <input type="date" id="arc_date" />
+          <input id="arc_raison" placeholder="Raison" />
+          <select id="arc_fait">
+            <option value="NON">NON</option>
+            <option value="OK">OK</option>
+          </select>
+
+          <div class="filebox">
+            <div class="row">
+              <div>
+                <div class="title">Photos livraison</div>
+                <div class="meta" id="arc_photos_meta">0 fichier sélectionné</div>
+              </div>
+              <label class="filebtn" for="arc_photos">Choisir</label>
+            </div>
+            <input type="file" id="arc_photos" accept="image/*" multiple onchange="updateFileMeta()" />
+          </div>
+
+          <div class="filebox">
+            <div class="row">
+              <div>
+                <div class="title">Attestation sur l'honneur</div>
+                <div class="meta" id="arc_attestation_meta">Aucun fichier</div>
+              </div>
+              <label class="filebtn" for="arc_attestation">Choisir</label>
+            </div>
+            <input type="file" id="arc_attestation" accept="image/*" onchange="updateFileMeta()" />
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="addARC()">Ajouter</button>
+          <button class="btn danger" onclick="clearARC()">Reset</button>
+          <button class="btn info" onclick="exportARC()">Export Excel</button>
+        </div>
+      </div>
+
+      <div class="topbar">
+          <div class="pill"><label>Recherche</label><input id="searchARC" placeholder="DA / Tracking" oninput="renderARC()" /></div>
+          <div class="pill"><label>SST</label><select id="arc_filter_sst" onchange="renderARC()"><option value="">Tous</option></select></div>
+          <div class="pill"><label>Statut</label><select id="arc_filter_statut" onchange="renderARC()"><option value="">Tous</option><option value="OK">OK</option><option value="EN ATTENTE">EN ATTENTE</option><option value="NON">NON</option></select></div>
+          <div class="pill"><label>Trier</label><select id="arc_sort" onchange="renderARC()"><option value="date_desc">Date ↓</option><option value="date_asc">Date ↑</option><option value="sst_asc">SST A→Z</option><option value="sst_desc">SST Z→A</option><option value="da_asc">DA A→Z</option><option value="da_desc">DA Z→A</option><option value="statut_asc">Statut</option></select></div>
+      </div>
+
+      <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>DA</th><th>Tracking</th><th>SST</th><th>Date</th><th>Raison</th><th>Photos</th><th>Attestation</th><th>Statut</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="arcBody"></tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="pool" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Gestion de renfort</div>
+        <div class="module-title">Pool DAR9</div>
+        <p class="module-text">Suivi des chauffeurs du pool avec tri direct par sous-traitant, station et statut.</p>
+        <div class="module-chips">
+          <div class="module-chip"><strong id="pool_live_total">0</strong><span>Total pool</span></div>
+          <div class="module-chip"><strong id="pool_live_sst">0</strong><span>Sous-traitants</span></div>
+          <div class="module-chip"><strong id="pool_live_station">0</strong><span>Stations</span></div>
+        </div>
+      </div>
+      <div class="card soft">
+        <h2>POOL – DAR9</h2>
+        <div class="grid">
+          <input id="pool_nom" placeholder="Nom DA" />
+          <input id="pool_sst" placeholder="Sous-traitant" />
+          <input id="pool_station" placeholder="Station" />
+          <input id="pool_statut" placeholder="Statut" />
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="addPOOL()">Ajouter</button>
+          <button class="btn danger" onclick="clearPOOL()">Reset</button>
+          <button class="btn info" onclick="exportPOOL()">Export Excel</button>
+        </div>
+      </div>
+
+      <div class="topbar">
+        <div class="pill"><label>Recherche</label><input id="pool_search" placeholder="DA / SST / station / statut" oninput="renderPOOL()" /></div>
+        <div class="pill"><label>SST</label><select id="pool_filter_sst" onchange="renderPOOL()"><option value="">Tous</option></select></div>
+        <div class="pill"><label>Station</label><select id="pool_filter_station" onchange="renderPOOL()"><option value="">Toutes</option></select></div>
+        <div class="pill"><label>Trier</label><select id="pool_sort" onchange="renderPOOL()"><option value="nom_asc">DA A→Z</option><option value="nom_desc">DA Z→A</option><option value="sst_asc">SST A→Z</option><option value="sst_desc">SST Z→A</option><option value="station_asc">Station A→Z</option><option value="statut_asc">Statut A→Z</option></select></div>
+      </div>
+
+      <div class="table-shell">
+      <table>
+        <thead><tr><th>DA</th><th>SST</th><th>Station</th><th>Statut</th><th>Action</th></tr></thead>
+        <tbody id="poolBody"></tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="drivers" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Référentiel terrain</div>
+        <div class="module-title">Base chauffeurs</div>
+        <p class="module-text">Base centrale pour retrouver rapidement les profils, les contacts et les sous-traitants avec un rendu plus moderne et plus lisible.</p>
+        <div class="module-chips">
+          <div class="module-chip"><strong id="drv_live_total">0</strong><span>Chauffeurs</span></div>
+          <div class="module-chip"><strong id="drv_live_sst">0</strong><span>Sous-traitants</span></div>
+          <div class="module-chip"><strong id="drv_live_contact">0</strong><span>Contacts renseignés</span></div>
+        </div>
+      </div>
+      <div class="card soft">
+        <h2>Base chauffeurs – DAR9</h2>
+        <p class="hint">Référence centrale pour le suivi des chauffeurs, de leurs contacts et des sous-traitants DAR9.</p>
+
+        <div class="grid">
+          <input id="drv_nom" placeholder="Nom / Prénom (ex: Olivia Guillot)" />
+          <input id="drv_mail" placeholder="Adresse mail" />
+          <input id="drv_phone" placeholder="Numéro" />
+          <input id="drv_sst" placeholder="Sous-traitant" />
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="addDriver()">Ajouter / Mettre à jour</button>
+          <button class="btn danger" onclick="clearDriverForm()">Reset</button>
+          <button class="btn info" onclick="exportDrivers()">Export Excel</button>
+        </div>
+      </div>
+
+      <div class="card soft">
+        <h2>Liste chauffeurs</h2>
+        <div class="topbar">
+          <div class="pill"><label>Recherche</label><input id="drv_search" placeholder="Nom / mail / numéro / SST" oninput="renderDrivers()" /></div>
+          <div class="pill"><label>SST</label><select id="drv_filter_sst" onchange="renderDrivers()"><option value="">Tous</option></select></div>
+          <div class="pill"><label>Trier</label><select id="drv_sort" onchange="renderDrivers()"><option value="nom_asc">Nom A→Z</option><option value="nom_desc">Nom Z→A</option><option value="sst_asc">SST A→Z</option><option value="sst_desc">SST Z→A</option></select></div>
+          <button class="btn danger" onclick="clearDriversAll()">Vider base</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nom / Prénom</th><th>Adresse mail</th><th>Numéro</th><th>Sous-traitant</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="driversBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+<section id="onboarding" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Intégration des chauffeurs</div>
+        <div class="module-title">Onboarding DAR9</div>
+        <p class="module-text">Suivi clair de la conformité, des validations et des documents de chaque nouveau chauffeur.</p>
+        <div class="module-chips">
+          <div class="module-chip"><strong id="ob_live_total">0</strong><span>Total onboarding</span></div>
+          <div class="module-chip"><strong id="ob_live_wait">0</strong><span>En attente</span></div>
+          <div class="module-chip"><strong id="ob_live_ok">0</strong><span>Validés</span></div>
+        </div>
+      </div>
+      <div class="card soft">
+        <h2>Suivi Onboarding – DAR9</h2>
+        <p class="hint">Saisie et suivi conformité/formation des nouveaux chauffeurs.</p>
+
+        <div class="grid">
+          <input id="ob_week" placeholder="Week (ex: W36)" />
+          <input type="date" id="ob_date" placeholder="DATE" />
+          <input id="ob_sst" placeholder="SOUS-TRAITANT" />
+          <input id="ob_noms" placeholder="NOMS (Nom & Prénom)" />
+
+          <select id="ob_statut">
+            <option value="EN ATTENTE">STATUT : EN ATTENTE</option>
+            <option value="OK">STATUT : OK</option>
+            <option value="NON">STATUT : NON</option>
+          </select>
+
+          <select id="ob_permis">
+            <option value="">VALIDATION PERMIS</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+
+          <select id="ob_antecedent">
+            <option value="">ANTECEDENT</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+
+          <select id="ob_photo">
+            <option value="">PHOTO</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+
+          <select id="ob_dpae">
+            <option value="">DPAE Cortex</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+
+          <select id="ob_cni">
+            <option value="">CNI / PASSEPORT</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+          <select id="ob_ass">
+            <option value="">ASSESSMENT HUB</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+
+          <select id="ob_formation">
+            <option value="">FORMATION</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+
+          <input id="ob_date_fait" placeholder="DATE/FAIT" />
+          <input id="ob_ident" placeholder="IDENTIFIANT" />
+          <input id="ob_liens" placeholder="LIENS" />
+
+          <select id="ob_physique">
+            <option value="">FORMATION PHYSIQUE</option>
+            <option value="OK">OK</option>
+            <option value="EN ATTENTE">EN ATTENTE</option>
+            <option value="NON">NON</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="addOnboarding()">Ajouter</button>
+          <button class="btn danger" onclick="clearOnboarding()">Reset</button>
+          <button class="btn info" onclick="exportOnboarding()">Export Excel</button>
+        </div>
+      </div>
+
+      <div class="topbar">
+        <div class="pill"><label>Recherche</label><input id="searchOB" placeholder="Nom / SST / Identifiant" oninput="renderOnboarding()" /></div>
+        <div class="pill"><label>SST</label><select id="ob_filter_sst" onchange="renderOnboarding()"><option value="">Tous</option></select></div>
+        <div class="pill"><label>Week</label><input id="ob_filter_week" placeholder="Ex: W36" oninput="renderOnboarding()" /></div>
+        <div class="pill"><label>Statut</label><select id="ob_filter_statut" onchange="renderOnboarding()"><option value="">Tous</option><option value="OK">OK</option><option value="EN ATTENTE">EN ATTENTE</option><option value="NON">NON</option></select></div>
+        <div class="pill"><label>Trier</label><select id="ob_sort" onchange="renderOnboarding()"><option value="date_desc">Date ↓</option><option value="date_asc">Date ↑</option><option value="nom_asc">Nom A→Z</option><option value="sst_asc">SST A→Z</option><option value="statut_asc">Statut</option></select></div>
+      </div>
+
+      <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>Week</th><th>Date</th><th>Sous-traitant</th><th>Noms</th><th>Statut</th>
+            <th>Permis</th><th>Antécédent</th><th>Photo</th><th>DPAE</th>
+            <th>CNI/Passeport</th><th>Assessment Hub</th><th>Formation</th><th>Date/Fait</th>
+            <th>Identifiant</th><th>Liens</th><th>Formation physique</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="onboardingBody"></tbody>
+      </table>
+      </div>
+    </section>
+
+
+
+    <section id="suivi_bu" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Back Up</div>
+        <div class="module-title">Suivi BU</div>
+        <p class="module-text">Onglet propre pour enregistrer les BU, surveiller les chauffeurs, personnaliser les sanctions et générer un résumé prêt à envoyer.</p>
+      </div>
+
+      <div class="bu-scope">
+        <div class="container">
+          <div class="bu-topbar">
+            <div class="bu-titleblock">
+              <h1>Suivi BU — Historique & sanctions</h1>
+              <p>Ajoute les BU, vois qui reçoit des BU, qui fait des BU, filtre semaine/mois/année et modifie tes sanctions comme tu veux.</p>
+            </div>
+            <div class="bu-top-actions">
+              <button class="bu-btn secondary" type="button" onclick="exportBUCSV()">⬇ Export Excel</button>
+              <button class="bu-btn secondary" type="button" onclick="exportBUJSON()">⬇ Export JSON</button>
+              <label class="bu-btn secondary" for="bu_json_import">⬆ Importer</label>
+              <input class="bu-file" type="file" id="bu_json_import" accept="application/json,.json" />
+              <button class="bu-btn danger" type="button" onclick="clearAllBU()">Vider BU</button>
+            </div>
+          </div>
+
+          <div class="bu-filterbar">
+            <div class="bu-filter"><label>Période</label><select id="bu_filter_period" onchange="renderBU()"><option value="week" selected>Cette semaine</option><option value="month">Ce mois</option><option value="year">Cette année</option><option value="all">Tout</option><option value="custom">Dates perso</option></select></div>
+            <div class="bu-filter"><label>Du</label><input type="date" id="bu_filter_from" onchange="renderBU()"></div>
+            <div class="bu-filter"><label>Au</label><input type="date" id="bu_filter_to" onchange="renderBU()"></div>
+            <div class="bu-filter"><label>Chauffeur</label><input type="text" id="bu_filter_driver" placeholder="Nom chauffeur" oninput="renderBU()"></div>
+            <div class="bu-filter"><label>Statut</label><select id="bu_filter_status" onchange="renderBU()"><option value="all">Tous</option><option value="danger">À sanctionner</option><option value="warn">À surveiller</option><option value="ok">OK</option></select></div>
+            <div class="bu-filter"><label>Tri</label><select id="bu_sort_ranking" onchange="renderBU()"><option value="week_desc">Max semaine ↓</option><option value="total_desc">Total BU ↓</option><option value="alpha_asc">Nom A → Z</option></select></div>
+            <button class="bu-btn secondary" type="button" onclick="resetBUFilters()">↻ Réinitialiser</button>
+          </div>
+
+          <section class="bu-kpis" id="bu_stats"></section>
+
+          <section class="bu-main-grid">
+            <div class="bu-card">
+              <div class="bu-card-head"><div class="bu-card-title"><span class="bu-icon">☑</span>Ajouter un BU</div></div>
+              <div class="bu-form">
+                <div class="bu-field">
+                  <label>Chauffeur qui reçoit le BU</label>
+                  <input type="text" id="bu_f_recoit" placeholder="Ex : Martin" list="bu_dl_drivers" autocomplete="off">
+                </div>
+                <div class="bu-field">
+                  <label>Chauffeur qui fait le BU</label>
+                  <input type="text" id="bu_f_fait" placeholder="Ex : Dupont" list="bu_dl_drivers2" autocomplete="off">
+                </div>
+                <div class="bu-row2">
+                  <div class="bu-field"><label>Date de l'incident</label><input type="date" id="bu_f_date"></div>
+                  <div class="bu-field"><label>Motif court</label><select id="bu_f_reason"><option value="">Choisir</option><option>Retard tournée</option><option>Panne véhicule</option><option>Manque de performance</option><option>Refus / besoin BU</option><option>Autre</option></select></div>
+                </div>
+                <div class="bu-field">
+                  <label>Commentaire</label>
+                  <textarea id="bu_f_note" placeholder="Détail optionnel : retard, panne, secteur, route, etc." maxlength="200"></textarea>
+                  <div class="bu-hint"><span>Ex : CA31, retard 25 points</span><span id="bu_note_count">0 / 200</span></div>
+                </div>
+                <div class="bu-actions">
+                  <button class="bu-btn secondary" type="button" onclick="clearBUForm()">↻ Réinitialiser</button>
+                  <button class="bu-btn primary" type="button" onclick="addBU()">💾 Enregistrer le BU</button>
+                </div>
+              </div>
+              <datalist id="bu_dl_drivers"></datalist><datalist id="bu_dl_drivers2"></datalist>
+            </div>
+
+            <div class="bu-card">
+              <div class="bu-card-head"><div class="bu-card-title"><span class="bu-icon">🛡</span>À sanctionner cette période</div></div>
+              <div id="bu_alert_box" class="bu-alert">Aucune alerte pour le moment.</div>
+              <div id="bu_sanction_list" class="bu-sanction-list"></div>
+            </div>
+
+            <div class="bu-card">
+              <div class="bu-card-head"><div class="bu-card-title"><span class="bu-icon">✈</span>Résumé prêt à envoyer</div></div>
+              <div id="bu_report" class="bu-report">Aucune donnée pour générer un résumé.</div>
+              <div class="bu-note"><strong>ℹ</strong><span>Copie ce résumé pour l’envoyer rapidement aux chefs d’équipe ou sous-traitants.</span></div>
+              <div class="bu-actions">
+                <button class="bu-btn secondary" type="button" onclick="copyBUReport()">📋 Copier résumé</button>
+                <button class="bu-btn secondary" type="button" onclick="toggleView('history')">☰ Voir historique</button>
+              </div>
+            </div>
+
+            <div class="bu-card bu-wide">
+              <div class="bu-helper-head">
+                <div>
+                  <div class="bu-card-title"><span class="bu-icon">🤝</span>Chauffeurs qui font des BU</div>
+                  <p class="bu-helper-sub">Ici on compte le chauffeur qui <b>fait le BU</b>. Ce n'est pas une sanction : c'est juste pour voir qui aide le plus sur la semaine, le mois et l'année.</p>
+                </div>
+                <button class="bu-btn secondary" type="button" onclick="exportBUHelpersCSV()">⬇ Export aides BU</button>
+              </div>
+              <div id="bu_helpers_grid" class="bu-helper-grid"></div>
+            </div>
+
+            <div class="bu-card bu-wide">
+              <div class="bu-panel-title">
+                <div class="bu-card-title"><span class="bu-icon">⚙</span>Règles de sanction modifiables</div>
+                <div class="bu-tabs">
+                  <button id="bu_btn_ranking" class="bu-btn secondary bu-tab active" type="button" onclick="toggleView('ranking')">Classement</button>
+                  <button id="bu_btn_history" class="bu-btn secondary bu-tab" type="button" onclick="toggleView('history')">Historique</button>
+                </div>
+              </div>
+
+              <div class="bu-settings">
+                <div class="bu-field"><label>Seuil surveillance</label><input type="number" min="1" id="bu_set_warn" onchange="saveBUSettings()"></div>
+                <div class="bu-field"><label>Seuil sanction</label><input type="number" min="1" id="bu_set_danger" onchange="saveBUSettings()"></div>
+                <div class="bu-field"><label>Sanction par défaut</label><select id="bu_set_default_sanction" onchange="saveBUSettings()"><option>Avertissement écrit</option><option>Interdiction de site 24h</option><option>Interdiction de site 72h</option><option>Retrait de route</option><option>Offboard</option><option>Autre</option></select></div>
+                <div class="bu-field"><label>Règle affichée</label><input type="text" id="bu_set_rule_text" placeholder="Ex : 3 BU = interdiction 72h" onchange="saveBUSettings()"></div>
+              </div>
+
+              <div id="bu_ranking_view" style="margin-top:18px"><div id="bu_ranking_grid" class="bu-ranking"></div></div>
+              <div id="bu_history_view" class="hide" style="margin-top:18px">
+                <div class="bu-table-wrap">
+                  <table>
+                    <thead><tr><th>Date</th><th>Chauffeur BU reçu</th><th>Fait par</th><th>Semaine</th><th>Total semaine</th><th>Statut</th><th>Commentaire</th><th>Action</th></tr></thead>
+                    <tbody id="bu_log_body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="qrcode" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Véhicules et étiquettes</div>
+        <div class="module-title">QR code DAR9</div>
+        <p class="module-text">Création rapide des étiquettes véhicules avec historique, recharge et impression directe.</p>
+        <div class="module-chips">
+          <div class="module-chip"><strong id="qr_live_total">0</strong><span>Étiquettes</span></div>
+          <div class="module-chip"><strong id="qr_live_redtag">0</strong><span>Redtag</span></div>
+          <div class="module-chip"><strong id="qr_live_sst">0</strong><span>SST distincts</span></div>
+        </div>
+      </div>
+      <div class="card soft">
+        <h2>Générateur d’étiquette QR Code – DAR9</h2>
+        <p class="hint">Le <b>QR code est généré par le VIN</b>. Tu peux choisir le DSP, station, short code, plaque, SST et Redtag, puis imprimer l’étiquette.</p>
+
+        <div class="grid">
+          <select id="qr_dsp">
+            <option value="DSP DAR9">DSP DAR9</option>
+            <option value="DSP DAR9 - GREEN">DSP DAR9 - GREEN</option>
+            <option value="DSP DAR9 - FDE">DSP DAR9 - FDE</option>
+          </select>
+          <input id="qr_country" placeholder="Country (ex: FDE)" value="FDE" />
+          <input id="qr_short" placeholder="Short Code (ex: TTM)" value="TTM" />
+          <input id="qr_station" placeholder="Station Code (ex: DAR9)" value="DAR9" />
+
+          <input id="qr_plaque" placeholder="License Plate / Plaque" />
+          <input id="qr_vin" placeholder="VIN véhicule (sert pour le QR)" />
+          <input id="qr_sst" placeholder="Sous-traitant" />
+
+          <select id="qr_format">
+            <option value="140x55">Format étiquette : 140×55 mm</option>
+            <option value="102x51">Format étiquette : 102×51 mm</option>
+            <option value="80x50">Format étiquette : 80×50 mm</option>
+            <option value="62x29">Format étiquette : 62×29 mm</option>
+          </select>
+
+          <select id="qr_redtag">
+            <option value="NON">Redtag : NON</option>
+            <option value="OUI">Redtag : OUI</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="generateLabel()">Générer</button>
+          <button class="btn info" onclick="printLabel()">Imprimer l’étiquette</button>
+          <button class="btn info" onclick="printSheet8()">A4 – planche de 8 étiquettes</button>
+          <button class="btn danger" onclick="clearLabel()">Reset</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Aperçu étiquette</h2>
+        <div id="labelWrap">
+          <!-- Single label preview -->
+          <div id="label" class="label">
+            <div class="labelLeft">
+              <div class="labelHeader">
+                <div class="labelLine"><span class="k">Country :</span> <span class="v" id="lbl_country">FDE</span></div>
+                <div class="dsp" id="lbl_dsp">DSP DAR9</div>
+              </div>
+              <div class="labelLine"><span class="k">Short Code :</span> <span class="v" id="lbl_short">TTM</span></div>
+              <div class="labelLine"><span class="k">Station Code :</span> <span class="v" id="lbl_station">DAR9</span></div>
+              <div class="labelLine"><span class="k">License Plate :</span> <span class="v" id="lbl_plaque">—</span></div>
+              <div class="labelLine"><span class="k">VIN :</span> <span class="v" id="lbl_vin">—</span></div>
+              <div class="labelLine"><span class="k">SST :</span> <span class="v" id="lbl_sst">—</span></div>
+              <div id="lbl_redtag" class="redtagBadge" style="display:none">REDTAG</div>
+            </div>
+
+            <div class="labelDivider"></div>
+
+            <div class="labelRight">
+              <div id="qr_canvas"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Historique des étiquettes</h2>
+        <div class="topbar">
+          <input id="qr_hist_search" placeholder="Recherche (VIN / Plaque / SST)" oninput="renderLabelHistory()" />
+          <button class="btn info" onclick="exportLabelHistory()">Export historique</button>
+          <button class="btn danger" onclick="clearLabelHistory()">Vider historique</button>
+        </div>
+        <div class="table-shell">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>DSP</th><th>Station</th><th>Plaque</th><th>VIN</th><th>SST</th><th>Redtag</th><th>Format</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="labelHistoryBody"></tbody>
+        </table>
+        </div>
+      </div>
+    </section>
+
+<section id="stats" class="section-shell">
+      <div class="dashboard-shell stats-shell">
+        <div class="dashboard-head">
+          <div>
+            <div class="dashboard-kicker">Indicateurs consolidés</div>
+            <h2 class="dashboard-title">Statistiques DAR9</h2>
+            <p class="dashboard-text">Vue synthétique des données enregistrées sur l'ensemble du site, mise à jour automatiquement.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid stats-grid-modern" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));">
+          <div class="dash-card accent"><div class="dash-label">Total ARC</div><div class="dash-value" id="s_arc">0</div><div class="dash-sub">Réclamations enregistrées</div></div>
+          <div class="dash-card"><div class="dash-label">ARC OK</div><div class="dash-value" id="s_ok">0</div><div class="dash-sub">Réclamations clôturées</div></div>
+          <div class="dash-card"><div class="dash-label">ARC en attente</div><div class="dash-value" id="s_ko">0</div><div class="dash-sub">Réclamations à traiter</div></div>
+          <div class="dash-card"><div class="dash-label">Pool</div><div class="dash-value" id="s_pool">0</div><div class="dash-sub">Chauffeurs dans le pool</div></div>
+          <div class="dash-card"><div class="dash-label">Onboarding</div><div class="dash-value" id="s_ob">0</div><div class="dash-sub">Suivis onboarding</div></div>
+          <div class="dash-card"><div class="dash-label">Base chauffeurs</div><div class="dash-value" id="s_drv">0</div><div class="dash-sub">Profils enregistrés</div></div>
+          <div class="dash-card"><div class="dash-label">QR codes</div><div class="dash-value" id="s_qr">0</div><div class="dash-sub">Historique des étiquettes</div></div>
+          <div class="dash-card"><div class="dash-label">Sous-traitants</div><div class="dash-value" id="s_sst">0</div><div class="dash-sub">Distincts sur la plateforme</div></div>
+        </div>
+
+        <div class="dashboard-panels bottom">
+          <div class="dashboard-panel">
+            <div class="dash-label">Sous-traitant dominant</div>
+            <div class="panel-value" id="stats_top_sst">—</div>
+            <div class="panel-sub" id="stats_top_sst_count">0 occurrence</div>
+          </div>
+          <div class="dashboard-panel">
+            <div class="dash-label">État global</div>
+            <div class="panel-value" id="stats_health">RAS</div>
+            <div class="panel-sub" id="stats_tip">Tous les indicateurs principaux sont visibles ici.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+<section id="history" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Traçabilité interne</div>
+        <div class="module-title">Historique des modifications</div>
+        <p class="module-text">Chaque ajout, suppression ou modification est centralisé pour garder une vue claire de l'activité sur le site.</p>
+        <div class="module-chips">
+          <div class="module-chip"><strong id="hist_live_total">0</strong><span>Actions enregistrées</span></div>
+        </div>
+      </div><div class="card soft">
+      <h2>Historique des modifications</h2>
+      <div class="topbar">
+        <div class="pill"><label>Recherche</label><input id="hist_search" placeholder="Action / Champ / Texte" oninput="renderHistory()" /></div>
+        <button class="btn danger" onclick="clearHistory()">Vider historique</button>
+      </div>
+      <div class="table-shell">
+      <table>
+        <thead><tr><th>Date</th><th>Action</th><th>Champ</th><th>Avant</th><th>Après</th><th>Action</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+      </div>
+      </div>
+    </section>
+
+    <section id="settings" class="section-shell">
+      <div class="module-hero">
+        <div class="module-kicker">Personnalisation</div>
+        <div class="module-title">Paramètres</div>
+        <p class="module-text">Ajuste le titre, le sous-titre et les couleurs principales pour adapter l'outil à ton exploitation.</p>
+      </div>
+      <div class="card soft">
+        <h2>Paramètres</h2>
+        <p class="hint">Personnalise l'apparence et les titres. Les paramètres sont maintenant partagés entre les postes connectés au site.</p>
+        <div class="grid">
+          <input id="set_title" placeholder="Titre (ex: FDE Amazon DSP DAR9)" />
+          <input id="set_subtitle" placeholder="Sous-titre (ex: Accueil • Dashboard • ARC / ECR • POOL • Onboarding)" />
+          <input id="set_accent" placeholder="Couleur principale (ex: #ff9900)" />
+          <input id="set_dark" placeholder="Couleur header 1 (ex: #131921)" />
+          <input id="set_grey" placeholder="Couleur header 2 (ex: #232f3e)" />
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="saveSettings()">Enregistrer</button>
+          <button class="btn info" onclick="refreshSharedData()">Rafraîchir les données partagées</button>
+          <button class="btn info" onclick="resetSettings()">Reset</button>
+        </div>
+      </div>
+    </section>
+  
+    <!-- Hidden print sheet (A4) -->
+    <div id="sheetWrap" style="display:none">
+      <div id="sheet" class="sheet">
+        <div class="sheetHeader">
+          <div class="sheetTitle">Planche A4 – 8 étiquettes</div>
+          <div class="sheetMeta" id="sheetMeta">Dernières étiquettes de l'historique</div>
+        </div>
+        <div id="sheetGrid" class="sheetGrid"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>© FDE Transport – DAR9 – outil interne partagé <span id="syncBadge" style="margin-left:8px;font-weight:800;color:#475569">Synchronisation…</span></footer>
+
+  <script>
+  (function(){
+    // ===== Helpers =====
+    const $ = (id) => document.getElementById(id);
+    const API_ENDPOINT = 'api_state.php';
+    const CACHE_KEYS = ['siteSettings','arcData','poolData','driversData','weeklyRows','weeklyData','onboardingData','labelHistory','historyLog','manualReminders'];
+    const syncTimers = {};
+    let syncInProgress = false;
+    let lastServerSync = null;
+
+    function setSyncBadge(text, tone){
+      const el = $('syncBadge');
+      if(!el) return;
+      el.textContent = text;
+      el.style.color = tone === 'ok' ? '#166534' : (tone === 'warn' ? '#9a3412' : (tone === 'error' ? '#991b1b' : '#475569'));
+    }
+
+    const load = (k, fallback) => {
+      try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(fallback)); }
+      catch { return fallback; }
+    };
+
+    function save(k, v){
+      localStorage.setItem(k, JSON.stringify(v));
+      queueServerSave(k, v);
+    }
+
+    function saveLocalOnly(k, v){
+      localStorage.setItem(k, JSON.stringify(v));
+    }
+
+    function queueServerSave(k, v){
+      clearTimeout(syncTimers[k]);
+      syncTimers[k] = setTimeout(function(){ pushServerState(k, v); }, 180);
+    }
+
+    async function pushServerState(k, v){
+      try{
+        syncInProgress = true;
+        setSyncBadge('Synchronisation…', 'warn');
+        const res = await fetch(API_ENDPOINT, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ action:'set', key:k, value:v })
+        });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error((data && data.error) || 'Erreur de sauvegarde');
+        lastServerSync = new Date();
+        setSyncBadge('Synchronisé', 'ok');
+      }catch(err){
+        console.error('pushServerState', err);
+        setSyncBadge('Sync locale seulement', 'error');
+      }finally{
+        syncInProgress = false;
+      }
+    }
+
+    async function pullServerState(silent){
+      try{
+        if(!silent) setSyncBadge('Chargement serveur…', 'warn');
+        const res = await fetch(API_ENDPOINT + '?action=get_all', { cache:'no-store' });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error((data && data.error) || 'Erreur serveur');
+        applyRemoteState(data.data || {});
+        lastServerSync = new Date();
+        setSyncBadge('Synchronisé', 'ok');
+      }catch(err){
+        console.error('pullServerState', err);
+        if(!silent) setSyncBadge('Mode cache local', 'error');
+      }
+    }
+
+    function applyRemoteState(remote){
+      if(remote.siteSettings){
+        settings = remote.siteSettings;
+        saveLocalOnly('siteSettings', settings);
+        applySettings();
+        hydrateSettingsForm();
+      }
+      if(Array.isArray(remote.arcData)){ arcData = remote.arcData; saveLocalOnly('arcData', arcData); }
+      if(Array.isArray(remote.poolData)){ poolData = remote.poolData; saveLocalOnly('poolData', poolData); }
+      if(Array.isArray(remote.driversData)){ driversData = remote.driversData; saveLocalOnly('driversData', driversData); }
+      if(Array.isArray(remote.weeklyRows)){ weeklyRows = remote.weeklyRows; saveLocalOnly('weeklyRows', weeklyRows); }
+      if(Array.isArray(remote.weeklyData)){ weeklyData = remote.weeklyData; saveLocalOnly('weeklyData', weeklyData); }
+      if(Array.isArray(remote.onboardingData)){ onboardingData = remote.onboardingData; saveLocalOnly('onboardingData', onboardingData); }
+      if(Array.isArray(remote.labelHistory)){ labelHistory = remote.labelHistory; saveLocalOnly('labelHistory', labelHistory); }
+      if(Array.isArray(remote.historyLog)){ historyLog = remote.historyLog; saveLocalOnly('historyLog', historyLog); }
+      if(Array.isArray(remote.manualReminders)){ manualReminders = remote.manualReminders; saveLocalOnly('manualReminders', manualReminders); }
+      if(typeof renderAll === 'function') renderAll();
+    }
+
+    window.refreshSharedData = function(){
+      return pullServerState(false);
+    };
+
+    const safe = (v) => (v ?? '').toString();
+    const badge = (v) => {
+      const val = safe(v).trim().toUpperCase();
+      const isOk = val === 'OK';
+      const isWait = val === 'EN ATTENTE' || val === 'ATTENTE' || val === 'PENDING';
+      const cls = isOk ? 'ok' : (isWait ? 'wait' : 'ko');
+      return `<span class="badge ${cls}">${safe(v || 'NON')}</span>`;
+    };
+
+    // ===== Settings =====
+    let settings = load('siteSettings', {
+      title: "FDE Amazon DSP DAR9",
+      subtitle: "Accueil • Dashboard • ARC / ECR • POOL • Onboarding",
+      accent: getComputedStyle(document.documentElement).getPropertyValue('--amazon-orange').trim() || "#ff9900",
+      dark: getComputedStyle(document.documentElement).getPropertyValue('--amazon-dark').trim() || "#131921",
+      grey: getComputedStyle(document.documentElement).getPropertyValue('--amazon-grey').trim() || "#232f3e"
+    });
+
+    function applySettings(){
+      if($('hdr_title')) $('hdr_title').innerHTML = safe(settings.title || 'FDE Amazon DSP DAR9');
+      if($('hdr_sub')) $('hdr_sub').innerText = safe(settings.subtitle || '');
+      if(settings.accent) document.documentElement.style.setProperty('--amazon-orange', settings.accent);
+      if(settings.dark) document.documentElement.style.setProperty('--amazon-dark', settings.dark);
+      if(settings.grey) document.documentElement.style.setProperty('--amazon-grey', settings.grey);
+    }
+
+    window.saveSettings = function(){
+      settings = {
+        title: safe($('set_title').value).trim() || settings.title,
+        subtitle: safe($('set_subtitle').value).trim() || settings.subtitle,
+        accent: safe($('set_accent').value).trim() || settings.accent,
+        dark: safe($('set_dark').value).trim() || settings.dark,
+        grey: safe($('set_grey').value).trim() || settings.grey
+      };
+      save('siteSettings', settings);
+      applySettings();
+      logChange('Paramètres', 'UI', '', 'Mise à jour');
+      alert('Paramètres enregistrés ✅');
+    };
+
+    window.resetSettings = function(){
+      settings = {
+        title: "FDE Amazon DSP DAR9",
+        subtitle: "Accueil • Dashboard • ARC / ECR • POOL • Onboarding",
+        accent: "#ff9900",
+        dark: "#131921",
+        grey: "#232f3e"
+      };
+      save('siteSettings', settings);
+      applySettings();
+      if($('set_title')) $('set_title').value='';
+      if($('set_subtitle')) $('set_subtitle').value='';
+      if($('set_accent')) $('set_accent').value='';
+      if($('set_dark')) $('set_dark').value='';
+      if($('set_grey')) $('set_grey').value='';
+      logChange('Paramètres', 'UI', '', 'Reset');
+      alert('Paramètres réinitialisés ✅');
+    };
+
+    function hydrateSettingsForm(){
+      if(!$('set_title')) return;
+      $('set_title').value = settings.title || '';
+      $('set_subtitle').value = settings.subtitle || '';
+      $('set_accent').value = settings.accent || '';
+      $('set_dark').value = settings.dark || '';
+      $('set_grey').value = settings.grey || '';
+    }
+
+// ===== Data =====
+    let arcData = load('arcData', []);
+    let poolData = load('poolData', []);
+
+    // Base chauffeurs (référence)
+    let driversData = load('driversData', []);
+
+    // Weekly planning (routes)
+    let weeklyRows = load('weeklyRows', []);
+
+    // Legacy (kept for compatibility if old weekly functions still exist)
+    let weeklyData = load('weeklyData', []);
+
+    let onboardingData = load('onboardingData', []);
+    let labelHistory = load('labelHistory', []);
+    let historyLog = load('historyLog', []);
+    let manualReminders = load('manualReminders', []);
+
+    // ===== History =====
+    function logChange(action, champ, avant, apres){
+      historyLog.push({
+        date: new Date().toLocaleString(),
+        action: safe(action),
+        champ: safe(champ),
+        avant: safe(avant),
+        apres: safe(apres)
+      });
+      save('historyLog', historyLog);
+      renderHistory();
+    }
+
+    // ===== Navigation =====
+    function moveNavIndicator(btn){
+      const ind = document.getElementById('navIndicator');
+      const wrap = document.querySelector('nav .nav-inner');
+      if(!ind || !wrap) return;
+      if(!btn) btn = document.querySelector('nav button.active');
+      if(!btn){ ind.style.width='0px'; return; }
+      const b = btn.getBoundingClientRect();
+      const w = wrap.getBoundingClientRect();
+      ind.style.left = (b.left - w.left) + 'px';
+      ind.style.width = b.width + 'px';
+    }
+
+    window.goTab = function(id){
+      const btn = document.querySelector('nav button[data-tab="' + id + '"]');
+      window.showTab(id, btn || undefined);
+    };
+
+    window.showTab = function(id, btn){
+      try {
+        document.querySelectorAll('main section').forEach(function(s){ s.classList.remove('active'); s.style.display='none'; });
+        document.querySelectorAll('nav button').forEach(function(b){ b.classList.remove('active'); });
+        const section = $(id);
+        if(section){ section.classList.add('active'); section.style.display='block'; }
+        if(!btn) btn = document.querySelector('nav button[data-tab="' + id + '"]');
+        if(btn) btn.classList.add('active');
+        moveNavIndicator(btn);
+        if(typeof renderAll === 'function') renderAll();
+        if(window.scrollTo) window.scrollTo({top:0, behavior:'smooth'});
+      } catch(err){
+        console.error('showTab error', err);
+      }
+      return false;
+    };
+
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('nav button[data-tab]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          showTab(btn.getAttribute('data-tab'), btn);
+        });
+      });
+      moveNavIndicator(document.querySelector('nav button.active'));
+    });
+
+    // ===== ARC =====
+    window.addARC = function(){
+      const da = safe($('arc_da').value).trim();
+      const tracking = safe($('arc_tracking').value).trim();
+      if(!da && !tracking) return; // minimum
+
+      const photosInput = $('arc_photos');
+      const attestationInput = $('arc_attestation');
+
+      const readFiles = (fileList) => Promise.all([...fileList].map(f => new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = e => res(e.target.result);
+        reader.onerror = () => rej(new Error('Lecture image impossible'));
+        reader.readAsDataURL(f);
+      })));
+
+      Promise.all([
+        readFiles(photosInput?.files || []),
+        (attestationInput?.files && attestationInput.files[0]) ? readFiles([attestationInput.files[0]]) : Promise.resolve([])
+      ])
+      .then(([photosBase64, attestationBase64]) => {
+        arcData.push({
+          da,
+          tracking,
+          sst: safe($('arc_sst').value).trim(),
+          date: safe($('arc_date').value),
+          raison: safe($('arc_raison').value).trim(),
+          fait: safe($('arc_fait').value) || 'NON',
+          photos: photosBase64,
+          attestation: attestationBase64[0] || null
+        });
+        save('arcData', arcData);
+        logChange('Ajout ARC', 'DA', '', da || tracking);
+        window.clearARC();
+        renderARC();
+        renderStats();
+      })
+      .catch((e)=>{
+        console.error(e);
+        alert("Impossible d'ajouter les photos. Réessaie avec des images plus légères.");
+      });
+    };
+
+    window.clearARC = function(){
+      ['arc_da','arc_tracking','arc_sst','arc_date','arc_raison'].forEach(id => $(id).value='');
+      $('arc_fait').value='NON';
+      // reset file inputs + meta
+      const p = $('arc_photos');
+      const a = $('arc_attestation');
+      if(p) p.value = '';
+      if(a) a.value = '';
+      if($('arc_photos_meta')) $('arc_photos_meta').innerText = '0 fichier sélectionné';
+      if($('arc_attestation_meta')) $('arc_attestation_meta').innerText = 'Aucun fichier';
+    };
+
+    function editARC(i, k, v){
+      const old = arcData[i]?.[k];
+      arcData[i][k] = safe(v).trim();
+      save('arcData', arcData);
+      logChange('Modification ARC', k, old, arcData[i][k]);
+      renderStats();
+    }
+
+    function delARC(i){
+      const old = arcData[i]?.da || arcData[i]?.tracking || '';
+      arcData.splice(i,1);
+      save('arcData', arcData);
+      logChange('Suppression ARC', 'DA/Tracking', old, '');
+      renderARC();
+      renderStats();
+    }
+
+    window.renderARC = function(){
+      const q = safe($('searchARC')?.value).toLowerCase().trim();
+      const fSst = safe($('arc_filter_sst')?.value).trim();
+      const fStat = safe($('arc_filter_statut')?.value).trim().toUpperCase();
+      const sort = safe($('arc_sort')?.value).trim() || 'date_desc';
+
+      // populate SST filter
+      const sstSel = $('arc_filter_sst');
+      if(sstSel){
+        const current = sstSel.value;
+        const ssts = Array.from(new Set(arcData.map(r=>safe(r.sst).trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+        sstSel.innerHTML = '<option value="">Tous</option>' + ssts.map(s=>`<option value="${safe(s)}">${safe(s)}</option>`).join('');
+        // keep selection if possible
+        if(current) sstSel.value = current;
+      }
+
+      const body = $('arcBody');
+      if(!body) return;
+      body.innerHTML='';
+
+      const rows = arcData
+        .filter(r => !q || safe(r.da).toLowerCase().includes(q) || safe(r.tracking).toLowerCase().includes(q))
+        .filter(r => !fSst || safe(r.sst).trim()===fSst)
+        .filter(r => !fStat || safe(r.fait).trim().toUpperCase()===fStat)
+        .slice();
+
+      const getDate = (d)=> d ? new Date(d).getTime() : 0;
+      rows.sort((a,b)=>{
+        switch(sort){
+          case 'date_asc': return getDate(a.date)-getDate(b.date);
+          case 'date_desc': return getDate(b.date)-getDate(a.date);
+          case 'sst_asc': return safe(a.sst).localeCompare(safe(b.sst));
+          case 'sst_desc': return safe(b.sst).localeCompare(safe(a.sst));
+          case 'da_asc': return safe(a.da).localeCompare(safe(b.da));
+          case 'da_desc': return safe(b.da).localeCompare(safe(a.da));
+          case 'statut_asc': return safe(a.fait).localeCompare(safe(b.fait));
+          default: return 0;
+        }
+      });
+
+      rows.forEach((r) => {
+        const idx = arcData.indexOf(r);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td contenteditable="true" onblur="__editARC(${idx},'da',this.innerText)">${safe(r.da)}</td>
+          <td contenteditable="true" onblur="__editARC(${idx},'tracking',this.innerText)">${safe(r.tracking)}</td>
+          <td contenteditable="true" onblur="__editARC(${idx},'sst',this.innerText)">${safe(r.sst)}</td>
+          <td>${safe(r.date)}</td>
+          <td contenteditable="true" onblur="__editARC(${idx},'raison',this.innerText)">${safe(r.raison)}</td>
+          <td>
+            <div class="thumbs">
+              ${(r.photos||[]).map((p,pi)=>`
+                <div class="thumb" title="Ouvrir">
+                  <img src="${p}" onclick="window.open('${p}','_blank')" />
+                  <div class="x" title="Supprimer" onclick="event.stopPropagation();__delARCPhoto(${idx},${pi})">×</div>
+                </div>
+              `).join('')}
+            </div>
+          </td>
+          <td>
+            ${r.attestation ? `
+              <div class="thumb" title="Ouvrir">
+                <img src="${r.attestation}" onclick="window.open('${r.attestation}','_blank')" />
+                <div class="x" title="Supprimer" onclick="event.stopPropagation();__delARCAtt(${idx})">×</div>
+              </div>
+            ` : ''}
+          </td>
+          <td>${badge(safe(r.fait)||'NON')}</td>
+          <td><button class="btn danger" onclick="__delARC(${idx})">X</button></td>
+        `;
+        body.appendChild(tr);
+      });
+    };
+
+    // Expose safe internal handlers for inline HTML
+    window.__editARC = editARC;
+    window.__delARC = delARC;
+
+    // Supprimer une photo livraison (par index)
+    window.__delARCPhoto = function(idx, photoIndex){
+      const row = arcData[idx];
+      if(!row || !Array.isArray(row.photos)) return;
+      row.photos.splice(photoIndex, 1);
+      save('arcData', arcData);
+      logChange('Suppression photo ARC', 'photos', '', '');
+      renderARC();
+    };
+
+    // Supprimer la photo d'attestation
+    window.__delARCAtt = function(idx){
+      const row = arcData[idx];
+      if(!row) return;
+      row.attestation = null;
+      save('arcData', arcData);
+      logChange('Suppression attestation ARC', 'attestation', '', '');
+      renderARC();
+    };
+
+    // UI: compteur fichiers sélectionnés
+    window.updateFileMeta = function(){
+      const p = $('arc_photos');
+      const a = $('arc_attestation');
+      const pm = $('arc_photos_meta');
+      const am = $('arc_attestation_meta');
+      if(pm){
+        const n = (p && p.files) ? p.files.length : 0;
+        pm.innerText = n === 0 ? '0 fichier sélectionné' : (n === 1 ? '1 fichier sélectionné' : `${n} fichiers sélectionnés`);
+      }
+      if(am){
+        const n = (a && a.files && a.files[0]) ? 1 : 0;
+        am.innerText = n ? '1 fichier sélectionné' : 'Aucun fichier';
+      }
+    };
+
+    window.exportARC = function(){ exportCSV(arcData, 'ARC_ECR_DAR9.csv'); };
+
+    // ===== POOL =====
+    window.addPOOL = function(){
+      const nom = safe($('pool_nom').value).trim();
+      if(!nom) return;
+      poolData.push({
+        nom,
+        sst: safe($('pool_sst').value).trim(),
+        station: safe($('pool_station').value).trim(),
+        statut: safe($('pool_statut').value).trim()
+      });
+      save('poolData', poolData);
+      logChange('Ajout POOL', 'DA', '', nom);
+      window.clearPOOL();
+      renderPOOL();
+      renderStats();
+    };
+
+    window.clearPOOL = function(){
+      ['pool_nom','pool_sst','pool_station','pool_statut'].forEach(id => $(id).value='');
+    };
+
+    function editPOOL(i,k,v){
+      const old = poolData[i]?.[k];
+      poolData[i][k] = safe(v).trim();
+      save('poolData', poolData);
+      logChange('Modification POOL', k, old, poolData[i][k]);
+      renderStats();
+    }
+
+    function delPOOL(i){
+      const old = poolData[i]?.nom || '';
+      poolData.splice(i,1);
+      save('poolData', poolData);
+      logChange('Suppression POOL', 'DA', old, '');
+      renderPOOL();
+      renderStats();
+    }
+
+    function renderPOOL(){
+      const body = $('poolBody');
+      if(!body) return;
+      const q = safe($('pool_search')?.value).toLowerCase().trim();
+      const fSst = safe($('pool_filter_sst')?.value).trim();
+      const fStation = safe($('pool_filter_station')?.value).trim();
+      const sort = safe($('pool_sort')?.value).trim() || 'nom_asc';
+
+      const sstSel = $('pool_filter_sst');
+      if(sstSel){
+        const cur = sstSel.value;
+        const ssts = Array.from(new Set(poolData.map(r=>safe(r.sst).trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+        sstSel.innerHTML = '<option value="">Tous</option>' + ssts.map(s=>`<option value="${safe(s)}">${safe(s)}</option>`).join('');
+        if(cur) sstSel.value = cur;
+      }
+      const stationSel = $('pool_filter_station');
+      if(stationSel){
+        const cur = stationSel.value;
+        const stations = Array.from(new Set(poolData.map(r=>safe(r.station).trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+        stationSel.innerHTML = '<option value="">Toutes</option>' + stations.map(s=>`<option value="${safe(s)}">${safe(s)}</option>`).join('');
+        if(cur) stationSel.value = cur;
+      }
+
+      const rows = poolData.filter(r=>{
+        const hay = (safe(r.nom)+' '+safe(r.sst)+' '+safe(r.station)+' '+safe(r.statut)).toLowerCase();
+        if(q && !hay.includes(q)) return false;
+        if(fSst && safe(r.sst).trim()!==fSst) return false;
+        if(fStation && safe(r.station).trim()!==fStation) return false;
+        return true;
+      }).slice();
+
+      rows.sort((a,b)=>{
+        switch(sort){
+          case 'nom_desc': return safe(b.nom).localeCompare(safe(a.nom));
+          case 'sst_asc': return safe(a.sst).localeCompare(safe(b.sst));
+          case 'sst_desc': return safe(b.sst).localeCompare(safe(a.sst));
+          case 'station_asc': return safe(a.station).localeCompare(safe(b.station));
+          case 'statut_asc': return safe(a.statut).localeCompare(safe(b.statut));
+          default: return safe(a.nom).localeCompare(safe(b.nom));
+        }
+      });
+
+      body.innerHTML='';
+      rows.forEach((r) => {
+        const idx = poolData.indexOf(r);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td contenteditable="true" onblur="__editPOOL(${idx},'nom',this.innerText)">${safe(r.nom)}</td>
+          <td contenteditable="true" onblur="__editPOOL(${idx},'sst',this.innerText)">${safe(r.sst)}</td>
+          <td contenteditable="true" onblur="__editPOOL(${idx},'station',this.innerText)">${safe(r.station)}</td>
+          <td contenteditable="true" onblur="__editPOOL(${idx},'statut',this.innerText)">${safe(r.statut)}</td>
+          <td><button class="btn danger" onclick="__delPOOL(${idx})">X</button></td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    window.__editPOOL = editPOOL;
+    window.__delPOOL = delPOOL;
+    window.exportPOOL = function(){ exportCSV(poolData, 'POOL_DAR9.csv'); };
+
+    // ===== WEEKLY =====
+    window.saveWeekly = function(){
+      const week = safe($('w_week').value).trim();
+      if(!week) return;
+      weeklyData.push({
+        week,
+        total: safe($('w_arc_total').value).trim(),
+        ok: safe($('w_arc_ok').value).trim(),
+        ko: safe($('w_arc_ko').value).trim(),
+        actions: safe($('w_actions').value).trim()
+      });
+      save('weeklyData', weeklyData);
+      logChange('Ajout Weekly', 'Semaine', '', week);
+      ['w_week','w_arc_total','w_arc_ok','w_arc_ko','w_actions'].forEach(id => $(id).value='');
+      renderWeekly();
+      renderStats();
+    };
+
+    function delWeekly(i){
+      const old = weeklyData[i]?.week || '';
+      weeklyData.splice(i,1);
+      save('weeklyData', weeklyData);
+      logChange('Suppression Weekly', 'Semaine', old, '');
+      renderWeekly();
+      renderStats();
+    }
+
+    function renderWeekly(){
+      const body = $('weeklyBody');
+      if(!body) return;
+      body.innerHTML='';
+      weeklyData.forEach((w, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td contenteditable="true" onblur="__editWeekly(${idx},'week',this.innerText)">${safe(w.week)}</td>
+          <td contenteditable="true" onblur="__editWeekly(${idx},'total',this.innerText)">${safe(w.total)}</td>
+          <td contenteditable="true" onblur="__editWeekly(${idx},'ok',this.innerText)">${safe(w.ok)}</td>
+          <td contenteditable="true" onblur="__editWeekly(${idx},'ko',this.innerText)">${safe(w.ko)}</td>
+          <td contenteditable="true" onblur="__editWeekly(${idx},'actions',this.innerText)">${safe(w.actions)}</td>
+          <td><button class="btn danger" onclick="__delWeekly(${idx})">X</button></td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function editWeekly(i,k,v){
+      const old = weeklyData[i]?.[k];
+      weeklyData[i][k] = safe(v).trim();
+      save('weeklyData', weeklyData);
+      logChange('Modification Weekly', k, old, weeklyData[i][k]);
+      renderStats();
+    }
+
+    window.__editWeekly = editWeekly;
+    window.__delWeekly = delWeekly;
+    window.exportWeekly = function(){ exportCSV(weeklyData, 'WEEKLY_DAR9.csv'); };
+
+    // ===== BASE CHAUFFEURS + WEEKLY V2 =====
+    function collapseSpaces(s){
+      s = safe(s).trim();
+      while(s.indexOf('  ')>=0) s = s.replace('  ',' ');
+      return s;
+    }
+    function normName(s){ return collapseSpaces(s).toLowerCase(); }
+
+    function rebuildDriversDatalist(){
+      var dl = $('driversList');
+      if(!dl) return;
+      dl.innerHTML = '';
+      var list = driversData.slice().sort(function(a,b){
+        return normName(a.nom).localeCompare(normName(b.nom));
+      });
+      list.forEach(function(d){
+        var opt = document.createElement('option');
+        opt.value = safe(d.nom);
+        dl.appendChild(opt);
+      });
+    }
+
+    function findDriverByName(name){
+      var key = normName(name);
+      for(var i=0;i<driversData.length;i++){
+        if(normName(driversData[i].nom)===key) return driversData[i];
+      }
+      return null;
+    }
+
+    window.clearDriverForm = function(){
+      var ids = ['drv_nom','drv_mail','drv_phone','drv_sst'];
+      ids.forEach(function(id){ if($(id)) $(id).value=''; });
+    };
+
+    window.addDriver = function(){
+      var nomEl = $('drv_nom');
+      if(!nomEl) return;
+      var nom = collapseSpaces(nomEl.value);
+      if(!nom){ alert('Nom / Prénom obligatoire'); return; }
+      var mail = collapseSpaces($('drv_mail')&&$('drv_mail').value);
+      var phone = collapseSpaces($('drv_phone')&&$('drv_phone').value);
+      var sst = collapseSpaces($('drv_sst')&&$('drv_sst').value);
+
+      var existingIdx = -1;
+      for(var i=0;i<driversData.length;i++){
+        if(normName(driversData[i].nom)===normName(nom)){ existingIdx=i; break; }
+      }
+
+      if(existingIdx>=0){
+        var oldNom = driversData[existingIdx].nom;
+        driversData[existingIdx] = { nom: nom, mail: mail, phone: phone, sst: sst };
+        logChange('Maj Chauffeur', 'Base chauffeurs', oldNom, nom);
+      } else {
+        driversData.unshift({ nom: nom, mail: mail, phone: phone, sst: sst });
+        logChange('Ajout Chauffeur', 'Base chauffeurs', '', nom);
+      }
+
+      driversData = driversData.slice(0,2000);
+      save('driversData', driversData);
+      rebuildDriversDatalist();
+      window.renderDrivers();
+      renderStats();
+      window.clearDriverForm();
+    };
+
+    window.__editDriver = function(i,k,v){
+      if(!driversData[i]) return;
+      var old = driversData[i][k];
+      driversData[i][k] = collapseSpaces(v);
+      save('driversData', driversData);
+      logChange('Modification Chauffeur', k, old, driversData[i][k]);
+      rebuildDriversDatalist();
+    };
+
+    window.__delDriver = function(i){
+      var old = driversData[i] ? driversData[i].nom : '';
+      driversData.splice(i,1);
+      save('driversData', driversData);
+      logChange('Suppression Chauffeur', 'Nom', old, '');
+      rebuildDriversDatalist();
+      window.renderDrivers();
+      renderStats();
+    };
+
+    window.clearDriversAll = function(){
+      if(!confirm('Vider toute la base chauffeurs ?')) return;
+      driversData = [];
+      save('driversData', driversData);
+      logChange('Base chauffeurs', 'driversData', '', 'Vidé');
+      rebuildDriversDatalist();
+      window.renderDrivers();
+      renderStats();
+    };
+
+    window.exportDrivers = function(){ exportCSV(driversData, 'BASE_CHAUFFEURS_DAR9.csv'); };
+
+    window.renderDrivers = function(){
+      var body = $('driversBody');
+      if(!body) return;
+      var q = safe($('drv_search')&&$('drv_search').value).toLowerCase().trim();
+      var fSst = safe($('drv_filter_sst')&&$('drv_filter_sst').value).trim();
+      var sort = safe($('drv_sort')&&$('drv_sort').value) || 'nom_asc';
+
+      // populate SST filter
+      var sel = $('drv_filter_sst');
+      if(sel){
+        var cur = sel.value;
+        var ssts = [];
+        driversData.forEach(function(d){ if(d.sst && ssts.indexOf(d.sst)===-1) ssts.push(d.sst); });
+        ssts.sort(function(a,b){return a.localeCompare(b);});
+        sel.innerHTML = '<option value="">Tous</option>' + ssts.map(function(s){return '<option value="'+safe(s)+'">'+safe(s)+'</option>';}).join('');
+        if(cur) sel.value = cur;
+      }
+
+      var rows = driversData.slice().filter(function(d){
+        if(q){
+          var hay = (safe(d.nom)+' '+safe(d.mail)+' '+safe(d.phone)+' '+safe(d.sst)).toLowerCase();
+          if(hay.indexOf(q)===-1) return false;
+        }
+        if(fSst && safe(d.sst)!==fSst) return false;
+        return true;
+      });
+
+      rows.sort(function(a,b){
+        switch(sort){
+          case 'nom_desc': return safe(b.nom).localeCompare(safe(a.nom));
+          case 'sst_asc': return safe(a.sst).localeCompare(safe(b.sst));
+          case 'sst_desc': return safe(b.sst).localeCompare(safe(a.sst));
+          default: return safe(a.nom).localeCompare(safe(b.nom));
+        }
+      });
+
+      body.innerHTML='';
+      rows.forEach(function(d){
+        var idx = driversData.indexOf(d);
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td contenteditable="true" onblur="__editDriver('+idx+',&quot;nom&quot;,this.innerText)">'+safe(d.nom)+'</td>'+
+          '<td contenteditable="true" onblur="__editDriver('+idx+',&quot;mail&quot;,this.innerText)">'+safe(d.mail)+'</td>'+
+          '<td contenteditable="true" onblur="__editDriver('+idx+',&quot;phone&quot;,this.innerText)">'+safe(d.phone)+'</td>'+
+          '<td contenteditable="true" onblur="__editDriver('+idx+',&quot;sst&quot;,this.innerText)">'+safe(d.sst)+'</td>'+
+          '<td><button class="btn danger" onclick="__delDriver('+idx+')">X</button></td>';
+        body.appendChild(tr);
+      });
+    };
+
+    // WEEKLY V2 (route planning)
+    window.showWeeklySub = function(which, btn){
+      var entry = $('weekly_entry');
+      var table = $('weekly_table');
+      if(entry) entry.style.display = (which==='entry') ? 'block' : 'none';
+      if(table) table.style.display = (which==='table') ? 'block' : 'none';
+      var wrap = btn && btn.parentElement;
+      if(wrap){
+        Array.prototype.forEach.call(wrap.querySelectorAll('button'), function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+      }
+      window.renderWeekly();
+    };
+
+    window.autofillWeeklyDriver = function(){
+      var nom = collapseSpaces($('wk_nom')&&$('wk_nom').value);
+      var d = findDriverByName(nom);
+      if($('wk_sst')) $('wk_sst').value = d ? safe(d.sst) : '';
+      if($('wk_plaque')) $('wk_plaque').value = d ? safe(d.plaque) : '';
+    };
+
+    window.clearWeeklyEntry = function(){
+      ['wk_date','wk_route','wk_nom','wk_depart','wk_arrivee'].forEach(function(id){ if($(id)) $(id).value=''; });
+      if($('wk_ementor')) $('wk_ementor').value='OK';
+      if($('wk_sst')) $('wk_sst').value='';
+      if($('wk_plaque')) $('wk_plaque').value='';
+    };
+
+    window.addWeeklyRow = function(){
+      var date = safe($('wk_date')&&$('wk_date').value);
+      var route = collapseSpaces($('wk_route')&&$('wk_route').value);
+      var nom = collapseSpaces($('wk_nom')&&$('wk_nom').value);
+      if(!date || !route || !nom){ alert('Il faut au minimum : Date + Route + Nom'); return; }
+
+      var d = findDriverByName(nom);
+      var sst = d && d.sst ? safe(d.sst) : collapseSpaces($('wk_sst')&&$('wk_sst').value);
+      var plaque = d && d.plaque ? safe(d.plaque) : collapseSpaces($('wk_plaque')&&$('wk_plaque').value);
+      var ementor = safe($('wk_ementor')&&$('wk_ementor').value) || 'OK';
+      var depart = collapseSpaces($('wk_depart')&&$('wk_depart').value);
+      var arrivee = collapseSpaces($('wk_arrivee')&&$('wk_arrivee').value);
+
+      weeklyRows.unshift({ date:date, route:route, nom:nom, ementor:ementor, sst:sst, plaque:plaque, depart:depart, arrivee:arrivee });
+      weeklyRows = weeklyRows.slice(0,2000);
+      save('weeklyRows', weeklyRows);
+      logChange('Ajout Weekly', 'Route', '', date+' '+route+' '+nom);
+      window.clearWeeklyEntry();
+      window.renderWeekly();
+      renderStats();
+    };
+
+    window.__editWeeklyRow = function(i,k,v){
+      if(!weeklyRows[i]) return;
+      var old = weeklyRows[i][k];
+      weeklyRows[i][k] = collapseSpaces(v);
+      save('weeklyRows', weeklyRows);
+      logChange('Modification Weekly', k, old, weeklyRows[i][k]);
+      renderStats();
+    };
+
+    window.__delWeeklyRow = function(i){
+      var oldNom = weeklyRows[i] ? weeklyRows[i].nom : '';
+      weeklyRows.splice(i,1);
+      save('weeklyRows', weeklyRows);
+      logChange('Suppression Weekly', 'Ligne', oldNom, '');
+      window.renderWeekly();
+      renderStats();
+    };
+
+    window.clearWeeklyAll = function(){
+      if(!confirm('Vider toutes les lignes Weekly ?')) return;
+      weeklyRows = [];
+      save('weeklyRows', weeklyRows);
+      logChange('Weekly', 'weeklyRows', '', 'Vidé');
+      window.renderWeekly();
+      renderStats();
+    };
+
+    window.__cycleWeeklyMentor = function(idx){
+      if(!weeklyRows[idx]) return;
+      var old = weeklyRows[idx].ementor;
+      var cur = normalizeStatus(old);
+      var next = (cur==='NON') ? 'EN ATTENTE' : ((cur==='EN ATTENTE' || cur==='') ? 'OK' : 'NON');
+      weeklyRows[idx].ementor = next;
+      save('weeklyRows', weeklyRows);
+      logChange('Cycle Weekly', 'ementor', old, next);
+      window.renderWeekly();
+    };
+
+    window.renderWeekly = function(){
+      var body = $('weeklyBody');
+      if(!body) return;
+      var q = safe($('wk_search')&&$('wk_search').value).toLowerCase().trim();
+      var fd = safe($('wk_filter_date')&&$('wk_filter_date').value).trim();
+      body.innerHTML='';
+
+      for(var idx=0; idx<weeklyRows.length; idx++){
+        var r = weeklyRows[idx];
+        if(fd && safe(r.date)!==fd) continue;
+        if(q){
+          var hay = (safe(r.route)+' '+safe(r.nom)+' '+safe(r.sst)+' '+safe(r.plaque)).toLowerCase();
+          if(hay.indexOf(q)===-1) continue;
+        }
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>'+safe(r.date)+'</td>'+
+          '<td contenteditable="true" onblur="__editWeeklyRow('+idx+',&quot;route&quot;,this.innerText)">'+safe(r.route)+'</td>'+
+          '<td contenteditable="true" onblur="__editWeeklyRow('+idx+',&quot;nom&quot;,this.innerText)">'+safe(r.nom)+'</td>'+
+          '<td onclick="__cycleWeeklyMentor('+idx+')" style="cursor:pointer">'+badge(safe(r.ementor))+'</td>'+
+          '<td>'+safe(r.sst)+'</td>'+
+          '<td>'+safe(r.plaque)+'</td>'+
+          '<td contenteditable="true" onblur="__editWeeklyRow('+idx+',&quot;depart&quot;,this.innerText)">'+safe(r.depart)+'</td>'+
+          '<td contenteditable="true" onblur="__editWeeklyRow('+idx+',&quot;arrivee&quot;,this.innerText)">'+safe(r.arrivee)+'</td>'+
+          '<td><button class="btn danger" onclick="__delWeeklyRow('+idx+')">X</button></td>';
+        body.appendChild(tr);
+      }
+    };
+
+    window.exportWeekly = function(){ exportCSV(weeklyRows, 'WEEKLY_ROUTES_DAR9.csv'); };
+
+
+    // ===== QRCODE =====
+    window.clearLabel = function(){
+      if($('qr_dsp')) $('qr_dsp').value='DSP DAR9';
+      if($('qr_country')) $('qr_country').value='FDE';
+      if($('qr_short')) $('qr_short').value='TTM';
+      if($('qr_station')) $('qr_station').value='DAR9';
+      if($('qr_sst')) $('qr_sst').value='';
+      if($('qr_plaque')) $('qr_plaque').value='';
+      if($('qr_vin')) $('qr_vin').value='';
+      if($('qr_redtag')) $('qr_redtag').value='NON';
+      if($('qr_format')) $('qr_format').value='140x55';
+      applyLabelFormat('140x55');
+
+      if($('lbl_dsp')) $('lbl_dsp').innerText='DSP DAR9';
+      if($('lbl_country')) $('lbl_country').innerText='FDE';
+      if($('lbl_short')) $('lbl_short').innerText='TTM';
+      if($('lbl_station')) $('lbl_station').innerText='DAR9';
+      if($('lbl_vin')) $('lbl_vin').innerText='—';
+      if($('lbl_plaque')) $('lbl_plaque').innerText='—';
+      if($('lbl_sst')) $('lbl_sst').innerText='—';
+      if($('lbl_redtag')) $('lbl_redtag').style.display='none';
+      if($('qr_canvas')) $('qr_canvas').innerHTML='';
+    };
+
+    function applyLabelFormat(fmt){
+      // fmt like "140x55"
+      const parts = safe(fmt).split('x');
+      const w = (parts[0]||'140').trim();
+      const h = (parts[1]||'55').trim();
+      document.documentElement.style.setProperty('--label-w', `${w}mm`);
+      document.documentElement.style.setProperty('--label-h', `${h}mm`);
+    }
+
+    window.applyLabelFormat = applyLabelFormat;
+
+    window.generateLabel = function(){
+      const vin = safe($('qr_vin')?.value).trim();
+      const sst = safe($('qr_sst')?.value).trim();
+      const plaque = safe($('qr_plaque')?.value).trim();
+      const redtag = safe($('qr_redtag')?.value).trim();
+      const dsp = safe($('qr_dsp')?.value).trim();
+      const country = safe($('qr_country')?.value).trim() || 'FDE';
+      const shortCode = safe($('qr_short')?.value).trim() || 'TTM';
+      const station = safe($('qr_station')?.value).trim() || 'DAR9';
+      const fmt = safe($('qr_format')?.value).trim() || '140x55';
+
+      if(!vin){
+        alert('Le VIN est obligatoire (c\'est lui qui génère le QR).');
+        return;
+      }
+
+      applyLabelFormat(fmt);
+
+      $('lbl_dsp').innerText = dsp || 'DSP DAR9';
+      $('lbl_country').innerText = country;
+      $('lbl_short').innerText = shortCode;
+      $('lbl_station').innerText = station;
+      $('lbl_vin').innerText = vin;
+      $('lbl_sst').innerText = sst || '—';
+      $('lbl_plaque').innerText = plaque || '—';
+      $('lbl_redtag').style.display = (redtag==='OUI') ? 'inline-flex' : 'none';
+
+      // Generate QR from VIN
+      const target = $('qr_canvas');
+      target.innerHTML='';
+      // adapt size with format (rough)
+      const qrPx = fmt==='62x29' ? 140 : (fmt==='80x50' ? 180 : (fmt==='102x51' ? 200 : 220));
+      const qrSvg = makeQrSvg(vin, qrPx);
+      target.appendChild(qrSvg);
+
+      // Save to history (dedupe: same VIN+plaque+station+fmt)
+      const entry = {
+        date: new Date().toLocaleString(),
+        dsp, country, shortCode, station,
+        plaque, vin, sst,
+        redtag,
+        format: fmt
+      };
+      labelHistory.unshift(entry);
+      // Keep last 300
+      labelHistory = labelHistory.slice(0,300);
+      save('labelHistory', labelHistory);
+      renderLabelHistory();
+
+      logChange('Génération QR', 'VIN', '', vin);
+    };
+
+    window.printLabel = function(){
+      // Ensure label is generated before printing
+      if($('qr_canvas') && !$('qr_canvas').children.length){
+        window.generateLabel();
+      }
+      document.body.classList.remove('print-sheet');
+      window.print();
+    };
+
+    function fmtToMm(fmt, fallback){
+      const parts = safe(fmt||'').split('x');
+      const w = parseInt(parts[0]||fallback?.w||102,10);
+      const h = parseInt(parts[1]||fallback?.h||51,10);
+      return {w:isNaN(w)?(fallback?.w||102):w, h:isNaN(h)?(fallback?.h||51):h};
+    }
+
+    function buildSheetLabel(entry){
+      const fmt = entry?.format || $('qr_format')?.value || '102x51';
+      const mm = fmtToMm(fmt, {w:102,h:51});
+
+      const wrap = document.createElement('div');
+      wrap.className = 'sheetLabel';
+      wrap.style.width = `${mm.w}mm`;
+      wrap.style.height = `${mm.h}mm`;
+
+      // Left
+      const left = document.createElement('div');
+      left.className = 'labelLeft';
+      left.innerHTML = `
+        <div class="labelHeader">
+          <div class="labelLine"><span class="k">Country :</span> <span class="v">${safe(entry.country||'FDE')}</span></div>
+          <div class="dsp">${safe(entry.dsp||'DSP DAR9')}</div>
+        </div>
+        <div class="labelLine"><span class="k">Short Code :</span> <span class="v">${safe(entry.shortCode||'TTM')}</span></div>
+        <div class="labelLine"><span class="k">Station Code :</span> <span class="v">${safe(entry.station||'DAR9')}</span></div>
+        <div class="labelLine"><span class="k">License Plate :</span> <span class="v">${safe(entry.plaque||'—')}</span></div>
+        <div class="labelLine"><span class="k">VIN :</span> <span class="v">${safe(entry.vin||'—')}</span></div>
+        <div class="labelLine"><span class="k">SST :</span> <span class="v">${safe(entry.sst||'—')}</span></div>
+      `;
+
+      if(safe(entry.redtag).toUpperCase()==='OUI'){
+        const rt = document.createElement('div');
+        rt.className = 'redtagBadge';
+        rt.textContent = 'REDTAG';
+        left.appendChild(rt);
+      }
+
+      // Divider
+      const div = document.createElement('div');
+      div.className = 'labelDivider';
+
+      // Right (QR)
+      const right = document.createElement('div');
+      right.className = 'labelRight';
+      const qrHolder = document.createElement('div');
+      const qrPx = mm.w <= 70 ? 120 : (mm.w <= 90 ? 150 : 170);
+      const qrSvg = makeQrSvg(safe(entry.vin||''), qrPx);
+      qrHolder.appendChild(qrSvg);
+      right.appendChild(qrHolder);
+
+      wrap.appendChild(left);
+      wrap.appendChild(div);
+      wrap.appendChild(right);
+      return wrap;
+    }
+
+    window.printSheet8 = function(){
+      // Source: 8 dernières étiquettes de l'historique.
+      // Si historique vide, on génère d'abord l'étiquette courante.
+      if(!labelHistory.length){
+        window.generateLabel();
+      }
+
+      const list = labelHistory.slice(0,8);
+      const grid = $('sheetGrid');
+      const meta = $('sheetMeta');
+      if(!grid) return;
+      grid.innerHTML='';
+
+      // If fewer than 8, fill remaining with blanks (still keeps layout)
+      while(list.length < 8) list.push({country:'', shortCode:'', station:'', plaque:'', vin:'', sst:'', dsp:'', redtag:'', format:$('qr_format')?.value || '102x51'});
+
+      list.forEach(e => {
+        const node = buildSheetLabel(e);
+        grid.appendChild(node);
+      });
+
+      if(meta) meta.innerText = `Source: ${Math.min(labelHistory.length,8)} dernière(s) étiquette(s) • ${new Date().toLocaleString()}`;
+
+      document.body.classList.add('print-sheet');
+      window.print();
+      // Return to normal after print
+      setTimeout(()=>document.body.classList.remove('print-sheet'), 300);
+    };
+
+    // --- Minimal QR generator (SVG), alphanumeric + byte, offline ---
+    // This is a compact implementation based on standard QR encoding (Version 2, ECC M).
+    // Enough for VIN strings (17 chars).
+
+    function makeQrSvg(text, sizePx){
+      const matrix = qrMatrixV2M(text);
+      const n = matrix.length;
+      const quiet = 4;
+      const scale = Math.floor(sizePx / (n + quiet*2));
+      const svgSize = (n + quiet*2) * scale;
+
+      const svgns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgns,'svg');
+      svg.setAttribute('width', String(svgSize));
+      svg.setAttribute('height', String(svgSize));
+      svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
+
+      const bg = document.createElementNS(svgns,'rect');
+      bg.setAttribute('x','0');bg.setAttribute('y','0');
+      bg.setAttribute('width',String(svgSize));bg.setAttribute('height',String(svgSize));
+      bg.setAttribute('fill','#fff');
+      svg.appendChild(bg);
+
+      const g = document.createElementNS(svgns,'g');
+      g.setAttribute('shape-rendering','crispEdges');
+
+      for(let y=0;y<n;y++){
+        for(let x=0;x<n;x++){
+          if(matrix[y][x]){
+            const r = document.createElementNS(svgns,'rect');
+            r.setAttribute('x', String((x+quiet)*scale));
+            r.setAttribute('y', String((y+quiet)*scale));
+            r.setAttribute('width', String(scale));
+            r.setAttribute('height', String(scale));
+            r.setAttribute('fill', '#000');
+            g.appendChild(r);
+          }
+        }
+      }
+      svg.appendChild(g);
+      return svg;
+    }
+
+    // --- QR Version 2 (25x25), ECC M, mask 0, byte-mode ---
+    // VIN fits comfortably.
+    function qrMatrixV2M(text){
+      // Version 2 specs
+      const size = 25;
+      const m = Array.from({length:size}, ()=>Array(size).fill(null));
+      const set = (x,y,v)=>{ if(0<=x&&x<size&&0<=y&&y<size) m[y][x]=v; };
+
+      // Finder patterns
+      function finder(x,y){
+        for(let dy=-1;dy<=7;dy++){
+          for(let dx=-1;dx<=7;dx++){
+            const xx=x+dx, yy=y+dy;
+            const on = (dx>=0&&dx<=6&&dy>=0&&dy<=6 && (dx===0||dx===6||dy===0||dy===6|| (dx>=2&&dx<=4&&dy>=2&&dy<=4)));
+            set(xx,yy, on?1:0);
+          }
+        }
+      }
+      finder(0,0); finder(size-7,0); finder(0,size-7);
+
+      // Timing patterns
+      for(let i=8;i<size-8;i++){
+        set(i,6, i%2===0?1:0);
+        set(6,i, i%2===0?1:0);
+      }
+
+      // Alignment pattern (version 2 has one at (18,18))
+      function align(cx,cy){
+        for(let dy=-2;dy<=2;dy++){
+          for(let dx=-2;dx<=2;dx++){
+            const xx=cx+dx, yy=cy+dy;
+            const on = (Math.max(Math.abs(dx),Math.abs(dy))===2) || (dx===0&&dy===0);
+            set(xx,yy,on?1:0);
+          }
+        }
+      }
+      align(18,18);
+
+      // Reserve format info areas
+      const reserve = (x,y)=>{ if(m[y][x]===null) m[y][x]=0; };
+      for(let i=0;i<9;i++){
+        if(i!==6){ reserve(8,i); reserve(i,8); }
+      }
+      for(let i=size-8;i<size;i++){
+        reserve(8,i);
+        reserve(i,8);
+      }
+      reserve(8, size-8);
+
+      // Dark module
+      set(8, size-8, 1);
+
+      // Build data bits (byte mode)
+      const bytes = new TextEncoder().encode(text);
+      const bits = [];
+      const pushBits = (val,len)=>{ for(let i=len-1;i>=0;i--) bits.push((val>>i)&1); };
+
+      // Mode indicator: 0100 (byte)
+      pushBits(0b0100,4);
+      // Character count (version 2 => 8 bits for byte mode)
+      pushBits(bytes.length,8);
+      // Data
+      for(const b of bytes) pushBits(b,8);
+      // Terminator up to capacity
+      const dataCapacityBits = 28*8; // V2-M has 28 data codewords
+      const terminator = Math.min(4, dataCapacityBits - bits.length);
+      for(let i=0;i<terminator;i++) bits.push(0);
+      // Pad to byte
+      while(bits.length%8!==0) bits.push(0);
+
+      // Pad codewords
+      const padBytes = [0xEC, 0x11];
+      let padIdx=0;
+      while(bits.length < dataCapacityBits){
+        pushBits(padBytes[padIdx%2],8);
+        padIdx++;
+      }
+
+      // Convert bits to data codewords
+      const dataCw = [];
+      for(let i=0;i<bits.length;i+=8){
+        let v=0; for(let j=0;j<8;j++) v=(v<<1)|bits[i+j];
+        dataCw.push(v);
+      }
+
+      // ECC (Reed-Solomon) for V2-M: 16 ecc codewords, 1 block
+      const ecc = rsCompute(dataCw, 16);
+      const all = dataCw.concat(ecc);
+
+      // Place data in matrix (mask 0)
+      let dir=-1;
+      let x=size-1;
+      let y=size-1;
+      let bitIndex=0;
+
+      const isReserved = (xx,yy)=> m[yy][xx]!==null;
+      while(x>0){
+        if(x===6) x--; // skip timing column
+        for(let i=0;i<size;i++){
+          const yy = y + dir*i;
+          for(let dx=0;dx<2;dx++){
+            const xx = x-dx;
+            if(isReserved(xx,yy)) continue;
+            const byte = all[Math.floor(bitIndex/8)];
+            const bit = (byte >> (7-(bitIndex%8))) & 1;
+            // mask 0: (x+y)%2==0
+            const masked = ((xx+yy)%2===0) ? (bit^1) : bit;
+            m[yy][xx]=masked;
+            bitIndex++;
+          }
+        }
+        y += dir*(size-1);
+        dir = -dir;
+        x -= 2;
+      }
+
+      // Fill remaining nulls as white
+      for(let yy=0;yy<size;yy++) for(let xx=0;xx<size;xx++) if(m[yy][xx]===null) m[yy][xx]=0;
+
+      // Format info for (ECC M, mask 0) => format bits 101010000010010
+      const fmt = 0b101010000010010;
+      const fmtBits = []; for(let i=14;i>=0;i--) fmtBits.push((fmt>>i)&1);
+      // place format bits
+      const putFmt = (xx,yy,b)=>{ m[yy][xx]=b; };
+      // around top-left
+      const coords1 = [[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+      // top-right + bottom-left
+      const coords2 = [[size-1,8],[size-2,8],[size-3,8],[size-4,8],[size-5,8],[size-6,8],[size-7,8],[8,size-8],[8,size-7],[8,size-6],[8,size-5],[8,size-4],[8,size-3],[8,size-2],[8,size-1]];
+      for(let i=0;i<15;i++){
+        putFmt(coords1[i][0],coords1[i][1],fmtBits[i]);
+        putFmt(coords2[i][0],coords2[i][1],fmtBits[i]);
+      }
+
+      // Return boolean matrix
+      return m.map(row=>row.map(v=>v===1));
+    }
+
+    // Reed-Solomon over GF(256) with primitive 0x11d
+    function rsCompute(data, eccLen){
+      const gfExp = new Uint8Array(512);
+      const gfLog = new Uint8Array(256);
+      let x=1;
+      for(let i=0;i<255;i++){
+        gfExp[i]=x;
+        gfLog[x]=i;
+        x<<=1;
+        if(x&0x100) x^=0x11d;
+      }
+      for(let i=255;i<512;i++) gfExp[i]=gfExp[i-255];
+      const gfMul=(a,b)=>{ if(a===0||b===0) return 0; return gfExp[gfLog[a]+gfLog[b]]; };
+
+      // generator poly
+      let gen=[1];
+      for(let i=0;i<eccLen;i++){
+        const next=[1, gfExp[i]];
+        const res=new Array(gen.length+1).fill(0);
+        for(let j=0;j<gen.length;j++){
+          res[j] ^= gen[j];
+          res[j+1] ^= gfMul(gen[j], next[1]);
+        }
+        gen=res;
+      }
+
+      const msg = data.concat(new Array(eccLen).fill(0));
+      for(let i=0;i<data.length;i++){
+        const coef = msg[i];
+        if(coef!==0){
+          for(let j=0;j<gen.length;j++){
+            msg[i+j] ^= gfMul(gen[j], coef);
+          }
+        }
+      }
+      return msg.slice(msg.length-eccLen);
+    }
+
+
+// ===== ONBOARDING =====
+    window.addOnboarding = function(){
+      const noms = safe($('ob_noms').value).trim();
+      if(!noms) return;
+
+      onboardingData.push({
+        week: safe($('ob_week').value).trim(),
+        date: safe($('ob_date').value),
+        sst: safe($('ob_sst').value).trim(),
+        noms,
+        statut: safe($('ob_statut').value) || 'EN ATTENTE',
+        permis: safe($('ob_permis').value),
+        antecedent: safe($('ob_antecedent').value),
+        photo: safe($('ob_photo').value),
+        dpae: safe($('ob_dpae').value),
+        cni: safe($('ob_cni').value),
+        assessment: safe($('ob_ass').value),
+        formation: safe($('ob_formation').value),
+        date_fait: safe($('ob_date_fait').value).trim(),
+        identifiant: safe($('ob_ident').value).trim(),
+        liens: safe($('ob_liens').value).trim(),
+        formation_physique: safe($('ob_physique').value)
+      });
+
+      save('onboardingData', onboardingData);
+      logChange('Ajout Onboarding', 'NOMS', '', noms);
+      window.clearOnboarding();
+      renderOnboarding();
+      renderStats();
+    };
+
+    window.clearOnboarding = function(){
+      document.querySelectorAll('#onboarding input, #onboarding select').forEach(el => el.value='');
+      if($('ob_statut')) $('ob_statut').value = 'EN ATTENTE';
+    };
+
+    function editOnboarding(i,k,v){
+      const old = onboardingData[i]?.[k];
+      onboardingData[i][k] = safe(v).trim();
+      save('onboardingData', onboardingData);
+      logChange('Modification Onboarding', k, old, onboardingData[i][k]);
+      renderStats();
+    }
+
+    function delOnboarding(i){
+      const old = onboardingData[i]?.noms || '';
+      onboardingData.splice(i,1);
+      save('onboardingData', onboardingData);
+      logChange('Suppression Onboarding', 'NOMS', old, '');
+      renderOnboarding();
+      renderStats();
+    }
+
+    window.renderOnboarding = function(){
+      const q = safe($('searchOB')?.value).toLowerCase().trim();
+      const fSst = safe($('ob_filter_sst')?.value).trim();
+      const fWeek = safe($('ob_filter_week')?.value).toLowerCase().trim();
+      const fStatut = safe($('ob_filter_statut')?.value).trim().toUpperCase();
+      const sort = safe($('ob_sort')?.value).trim() || 'date_desc';
+
+      // populate SST filter
+      const sel = $('ob_filter_sst');
+      if(sel){
+        const cur = sel.value;
+        const ssts = Array.from(new Set(onboardingData.map(r=>safe(r.sst).trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+        sel.innerHTML = '<option value="">Tous</option>' + ssts.map(s=>`<option value="${safe(s)}">${safe(s)}</option>`).join('');
+        if(cur) sel.value = cur;
+      }
+
+      const body = $('onboardingBody');
+      if(!body) return;
+      body.innerHTML='';
+
+      const rows = onboardingData
+        .filter(o => !q || safe(o.noms).toLowerCase().includes(q) || safe(o.sst).toLowerCase().includes(q) || safe(o.identifiant).toLowerCase().includes(q))
+        .filter(o => !fSst || safe(o.sst).trim()===fSst)
+        .filter(o => !fWeek || safe(o.week).toLowerCase().includes(fWeek))
+        .filter(o => !fStatut || safe(o.statut).trim().toUpperCase()===fStatut)
+        .slice();
+
+      const getDate = (d)=> d ? new Date(d).getTime() : 0;
+      rows.sort((a,b)=>{
+        switch(sort){
+          case 'date_asc': return getDate(a.date)-getDate(b.date);
+          case 'date_desc': return getDate(b.date)-getDate(a.date);
+          case 'nom_asc': return safe(a.noms).localeCompare(safe(b.noms));
+          case 'sst_asc': return safe(a.sst).localeCompare(safe(b.sst));
+          case 'statut_asc': return safe(a.statut).localeCompare(safe(b.statut));
+          default: return 0;
+        }
+      });
+
+      rows.forEach((o) => {
+        const realIdx = onboardingData.indexOf(o);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td contenteditable="true" onblur="__editOB(${realIdx},'week',this.innerText)">${safe(o.week)}</td>
+            <td>${safe(o.date)}</td>
+            <td contenteditable="true" onblur="__editOB(${realIdx},'sst',this.innerText)">${safe(o.sst)}</td>
+            <td contenteditable="true" onblur="__editOB(${realIdx},'noms',this.innerText)">${safe(o.noms)}</td>
+            <td onclick="__cycleOB(${realIdx},'statut')" style="cursor:pointer">${badge(safe(o.statut||'EN ATTENTE'))}</td>
+            <td onclick="__cycleOB(${realIdx},'permis')" style="cursor:pointer">${badge(safe(o.permis))}</td>
+            <td onclick="__cycleOB(${realIdx},'antecedent')" style="cursor:pointer">${badge(safe(o.antecedent))}</td>
+            <td onclick="__cycleOB(${realIdx},'photo')" style="cursor:pointer">${badge(safe(o.photo))}</td>
+            <td onclick="__cycleOB(${realIdx},'dpae')" style="cursor:pointer">${badge(safe(o.dpae))}</td>
+            <td onclick="__cycleOB(${realIdx},'cni')" style="cursor:pointer">${badge(safe(o.cni))}</td>
+            <td onclick="__cycleOB(${realIdx},'assessment')" style="cursor:pointer">${badge(safe(o.assessment))}</td>
+            <td onclick="__cycleOB(${realIdx},'formation')" style="cursor:pointer">${badge(safe(o.formation))}</td>
+            <td contenteditable="true" onblur="__editOB(${realIdx},'date_fait',this.innerText)">${safe(o.date_fait)}</td>
+            <td contenteditable="true" onblur="__editOB(${realIdx},'identifiant',this.innerText)">${safe(o.identifiant)}</td>
+            <td contenteditable="true" onblur="__editOB(${realIdx},'liens',this.innerText)">${safe(o.liens)}</td>
+            <td onclick="__cycleOB(${realIdx},'formation_physique')" style="cursor:pointer">${badge(safe(o.formation_physique))}</td>
+            <td><button class="btn danger" onclick="__delOB(${realIdx})">X</button></td>
+          `;
+          body.appendChild(tr);
+        });
+    };
+
+    function normalizeStatus(v){
+      const val = safe(v).trim().toUpperCase();
+      if(val==='OK') return 'OK';
+      if(val==='EN ATTENTE' || val==='ATTENTE' || val==='PENDING') return 'EN ATTENTE';
+      if(val==='NON' || val==='KO' || val==='NO') return 'NON';
+      if(val==='') return '';
+      // Any other value: treat as EN ATTENTE (safer default)
+      return 'EN ATTENTE';
+    }
+
+    function nextStatus(v){
+      const cur = normalizeStatus(v);
+      // Cycle: NON -> EN ATTENTE -> OK -> NON
+      if(cur==='NON') return 'EN ATTENTE';
+      if(cur==='EN ATTENTE' || cur==='') return 'OK';
+      return 'NON';
+    }
+
+    window.__cycleOB = function(idx, field){
+      if(!onboardingData[idx]) return;
+      const old = onboardingData[idx][field];
+      const next = nextStatus(old);
+      onboardingData[idx][field] = next;
+      save('onboardingData', onboardingData);
+      logChange('Cycle Onboarding', field, old, next);
+      renderOnboarding();
+      renderStats();
+    };
+
+    window.__editOB = editOnboarding;
+    window.__delOB = delOnboarding;
+    window.exportOnboarding = function(){ exportCSV(onboardingData, 'ONBOARDING_DAR9.csv'); };
+
+    function onboardingIsComplete(row){
+      if(normalizeStatus(row?.statut) !== 'OK') return false;
+      const checks = ['permis','antecedent','photo','dpae','cni','ass','formation','physique'];
+      for(const key of checks){ if(normalizeStatus(row?.[key]) !== 'OK') return false; }
+      return true;
+    }
+
+    function priorityClass(priority){
+      const p = safe(priority).toLowerCase();
+      if(p === 'haute') return 'high';
+      if(p === 'basse') return 'low';
+      return 'normal';
+    }
+
+    function formatReminderDate(v){
+      if(!v) return 'Sans date';
+      const d = new Date(v+'T00:00:00');
+      if(isNaN(d.getTime())) return safe(v);
+      return d.toLocaleDateString('fr-FR');
+    }
+
+    window.clearManualReminderForm = function(){
+      ['manual_rem_title','manual_rem_owner','manual_rem_deadline','manual_rem_note'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
+      const p = $('manual_rem_priority');
+      if(p) p.value = 'Normale';
+    };
+
+    window.addManualReminder = function(){
+      const title = safe($('manual_rem_title')?.value).trim();
+      if(!title) return;
+      const reminder = {
+        title,
+        priority: safe($('manual_rem_priority')?.value).trim() || 'Normale',
+        owner: safe($('manual_rem_owner')?.value).trim(),
+        deadline: safe($('manual_rem_deadline')?.value).trim(),
+        note: safe($('manual_rem_note')?.value).trim(),
+        done: false,
+        createdAt: new Date().toLocaleString('fr-FR')
+      };
+      manualReminders.unshift(reminder);
+      save('manualReminders', manualReminders);
+      logChange('Ajout rappel', 'Rappels', '', reminder.title);
+      clearManualReminderForm();
+      renderReminders();
+    };
+
+    window.toggleManualReminder = function(idx){
+      if(!manualReminders[idx]) return;
+      const old = manualReminders[idx].done ? 'Terminé' : 'À faire';
+      manualReminders[idx].done = !manualReminders[idx].done;
+      save('manualReminders', manualReminders);
+      logChange('Statut rappel', 'Rappels', old, manualReminders[idx].done ? 'Terminé' : 'À faire');
+      renderReminders();
+    };
+
+    window.deleteManualReminder = function(idx){
+      if(idx < 0 || idx >= manualReminders.length) return;
+      const old = manualReminders[idx].title || 'Rappel';
+      manualReminders.splice(idx, 1);
+      save('manualReminders', manualReminders);
+      logChange('Suppression rappel', 'Rappels', old, '');
+      renderReminders();
+    };
+
+    function renderReminders(){
+      const list = $('reminder_list');
+      const total = manualReminders.filter(r => !r.done).length;
+      const high = manualReminders.filter(r => !r.done && safe(r.priority).toLowerCase()==='haute').length;
+      const next = manualReminders.find(r => !r.done);
+      const setText=(id,val)=>{ const el=$(id); if(el) el.innerText = val; };
+      setText('rem_total_count', total);
+      setText('rem_high_count', high);
+      setText('rem_next_title', next ? safe(next.title) : 'RAS');
+      setText('rem_next_date', next ? formatReminderDate(next.deadline) : '—');
+      if(!list) return;
+      if(!manualReminders.length){
+        list.innerHTML = '<div class="reminder-card"><div class="reminder-badge ok">RAS</div><h3>Aucun rappel</h3><p>Ajoute un rappel manuel pour commencer ton suivi.</p></div>';
+        return;
+      }
+      list.innerHTML = manualReminders.map((item, idx) => {
+        const doneCls = item.done ? 'ok' : priorityClass(item.priority);
+        const doneLabel = item.done ? 'Terminé' : safe(item.priority || 'Normale');
+        return '<div class="reminder-card" style="opacity:'+(item.done ? '0.72' : '1')+'">'
+          + '<div class="reminder-badge '+doneCls+'">'+doneLabel+'</div>'
+          + '<h3>'+safe(item.title)+'</h3>'
+          + '<p>'+(safe(item.note) || 'Aucun détail ajouté.')+'</p>'
+          + '<div class="reminder-meta">'
+          + '<div class="reminder-pill">'+(safe(item.owner) || 'Sans responsable')+'</div>'
+          + '<div class="reminder-pill">'+formatReminderDate(item.deadline)+'</div>'
+          + '<div class="reminder-pill">Créé le '+safe(item.createdAt || '')+'</div>'
+          + '</div>'
+          + '<div class="reminder-actions">'
+          + '<button class="btn '+(item.done ? 'info' : 'primary')+'" type="button" onclick="toggleManualReminder('+idx+')">'+(item.done ? 'Remettre à faire' : 'Marquer comme terminé')+'</button>'
+          + '<button class="btn danger" type="button" onclick="deleteManualReminder('+idx+')">Supprimer</button>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+    function renderStats(){
+
+      const arcTotal = arcData.length;
+      const arcOk = arcData.filter(r => normalizeStatus(r.fait)==='OK').length;
+      const arcWait = arcData.filter(r => normalizeStatus(r.fait)!=='OK').length;
+      const poolTotal = poolData.length;
+      const obTotal = onboardingData.length;
+      const obOk = onboardingData.filter(r => normalizeStatus(r.statut)==='OK').length;
+      const obWait = onboardingData.filter(r => normalizeStatus(r.statut)!=='OK').length;
+      const drvTotal = driversData.length;
+      const qrTotal = labelHistory.length;
+      const qrRedtag = labelHistory.filter(r => safe(r.redtag).trim().toUpperCase()==='OUI').length;
+      const unique = (arr) => Array.from(new Set(arr.map(v => safe(v).trim()).filter(Boolean)));
+      const uniquePoolSst = unique(poolData.map(r=>r.sst)).length;
+      const uniquePoolStation = unique(poolData.map(r=>r.station)).length;
+      const uniqueDrvSst = unique(driversData.map(r=>r.sst)).length;
+      const drvContacts = driversData.filter(r=>safe(r.mail).trim() || safe(r.phone).trim()).length;
+      const qrSst = unique(labelHistory.map(r=>r.sst)).length;
+
+      const sstCounts = {};
+      [
+        ...arcData.map(r=>r.sst),
+        ...poolData.map(r=>r.sst),
+        ...onboardingData.map(r=>r.sst),
+        ...driversData.map(r=>r.sst)
+      ].forEach(v=>{
+        const k = safe(v).trim();
+        if(!k) return;
+        sstCounts[k] = (sstCounts[k]||0)+1;
+      });
+      let topSst = '—';
+      let topVal = 0;
+      Object.keys(sstCounts).forEach(k=>{ if(sstCounts[k] > topVal){ topVal = sstCounts[k]; topSst = k; } });
+      const globalSst = Object.keys(sstCounts).length;
+      const arcRate = arcTotal ? Math.round((arcOk / arcTotal) * 100) : 0;
+      const obRate = obTotal ? Math.round((obOk / obTotal) * 100) : 0;
+      const qrRedtagRate = qrTotal ? Math.round((qrRedtag / qrTotal) * 100) : 0;
+
+      const health = arcWait >= 10 ? 'Alerte' : (arcWait >= 5 ? 'Surveillance' : 'RAS');
+      const tip = arcWait >= 10
+        ? 'Volume ARC élevé : priorise les dossiers en attente et filtre par sous-traitant.'
+        : (obWait > 0
+          ? 'Des onboarding sont encore en attente : vérifie les validations avant le départ.'
+          : 'Tous les modules sont synchronisés : utilise les filtres pour retrouver rapidement une ligne précise.');
+
+      const setText=(id,val)=>{ const el=$(id); if(el) el.innerText = val; };
+      const setWidth=(id,val)=>{ const el=$(id); if(el) el.style.width = val + '%'; };
+      setText('s_arc', arcTotal); setText('s_ok', arcOk); setText('s_ko', arcWait); setText('s_pool', poolTotal); setText('s_ob', obTotal); setText('s_drv', drvTotal); setText('s_qr', qrTotal); setText('s_sst', globalSst); setText('s_weekly', weeklyRows.length);
+      setText('ov_arc', arcTotal); setText('ov_arc_wait', arcWait); setText('ov_pool', poolTotal); setText('ov_onboarding', obTotal); setText('ov_drivers', drvTotal); setText('ov_labels', qrTotal); setText('ov_top_sst', topSst); setText('ov_top_sst_count', topVal + (topVal > 1 ? ' occurrences' : ' occurrence')); setText('ov_health', health); setText('ov_tip', tip);
+      setText('stats_health', health);
+      setText('stats_tip', tip);
+      arcData.length, poolData.length;
+      const recent = historyLog.slice(-3).reverse();
+      const recentEl = $('dash_recent');
+      if(recentEl){
+        recentEl.innerHTML = recent.length ? recent.map(item => '<div class="recent-item"><strong>'+safe(item.action || 'Action')+'</strong><span>'+safe(item.date)+' • '+safe(item.champ || 'Mise à jour')+'</span></div>').join('') : '<div class="recent-item"><strong>Aucune activité récente</strong><span>Les prochaines modifications apparaîtront ici.</span></div>';
+      }
+      setText('arc_live_total', arcTotal); setText('arc_live_wait', arcWait); setText('arc_live_ok', arcOk);
+      setText('pool_live_total', poolTotal); setText('pool_live_sst', uniquePoolSst); setText('pool_live_station', uniquePoolStation);
+      setText('drv_live_total', drvTotal); setText('drv_live_sst', uniqueDrvSst); setText('drv_live_contact', drvContacts);
+      setText('ob_live_total', obTotal); setText('ob_live_wait', obWait); setText('ob_live_ok', obOk);
+      setText('qr_live_total', qrTotal); setText('qr_live_redtag', qrRedtag); setText('qr_live_sst', qrSst);
+      setText('hist_live_total', historyLog.length);
+      renderReminders();
+    }
+
+    // ===== History render =====
+    function renderLabelHistory(){
+      const body = $('labelHistoryBody');
+      if(!body) return;
+      const q = safe($('qr_hist_search')?.value).toLowerCase().trim();
+      body.innerHTML='';
+      labelHistory
+        .filter(e => !q || safe(e.vin).toLowerCase().includes(q) || safe(e.plaque).toLowerCase().includes(q) || safe(e.sst).toLowerCase().includes(q))
+        .forEach((e, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${safe(e.date)}</td>
+            <td>${safe(e.dsp)}</td>
+            <td>${safe(e.station)}</td>
+            <td>${safe(e.plaque)}</td>
+            <td>${safe(e.vin)}</td>
+            <td>${safe(e.sst)}</td>
+            <td>${safe(e.redtag)}</td>
+            <td>${safe(e.format)}</td>
+            <td>
+              <button class="btn info" onclick="loadLabelFromHistory(${idx})">Charger</button>
+              <button class="btn primary" onclick="printFromHistory(${idx})">Imprimer</button>
+              <button class="btn danger" onclick="deleteLabelHistory(${idx})">X</button>
+            </td>
+          `;
+          body.appendChild(tr);
+        });
+    }
+
+    window.renderLabelHistory = renderLabelHistory;
+
+    window.loadLabelFromHistory = function(idx){
+      const e = labelHistory[idx];
+      if(!e) return;
+      $('qr_dsp').value = e.dsp || 'DSP DAR9';
+      $('qr_country').value = e.country || 'FDE';
+      $('qr_short').value = e.shortCode || 'TTM';
+      $('qr_station').value = e.station || 'DAR9';
+      $('qr_plaque').value = e.plaque || '';
+      $('qr_vin').value = e.vin || '';
+      $('qr_sst').value = e.sst || '';
+      $('qr_redtag').value = e.redtag || 'NON';
+      $('qr_format').value = e.format || '140x55';
+      window.generateLabel();
+    };
+
+    window.printFromHistory = function(idx){
+      window.loadLabelFromHistory(idx);
+      window.printLabel();
+    };
+
+    window.deleteLabelHistory = function(idx){
+      const e = labelHistory[idx];
+      labelHistory.splice(idx,1);
+      save('labelHistory', labelHistory);
+      logChange('Suppression étiquette', 'VIN', e?.vin || '', '');
+      renderLabelHistory();
+      renderStats();
+    };
+
+    window.clearLabelHistory = function(){
+      if(!confirm('Vider tout l\'historique des étiquettes ?')) return;
+      labelHistory = [];
+      save('labelHistory', labelHistory);
+      logChange('Historique étiquettes', 'labelHistory', '', 'Vidé');
+      renderLabelHistory();
+      renderStats();
+    };
+
+    window.exportLabelHistory = function(){
+      exportCSV(labelHistory, 'HISTORIQUE_ETIQUETTES_DAR9.csv');
+    };
+
+window.deleteHistoryRow = function(index){
+      if(index<0 || index>=historyLog.length) return;
+      const h = historyLog[index];
+      if(!confirm('Supprimer cette modification ?')) return;
+      historyLog.splice(index,1);
+      save('historyLog', historyLog);
+      renderHistory();
+      renderStats();
+    };
+
+    window.clearHistory = function(){
+      if(!confirm('Vider tout l\'historique des modifications ?')) return;
+      historyLog = [];
+      save('historyLog', historyLog);
+      renderHistory();
+      renderStats();
+    };
+
+    function renderHistory(){
+      const body = $('historyBody');
+      if(!body) return;
+      const q = safe($('hist_search')?.value).toLowerCase().trim();
+      body.innerHTML='';
+
+      // newest first
+      for(let rev=historyLog.length-1; rev>=0; rev--){
+        const h = historyLog[rev];
+        const hay = (safe(h.date)+' '+safe(h.action)+' '+safe(h.champ)+' '+safe(h.avant)+' '+safe(h.apres)).toLowerCase();
+        if(q && hay.indexOf(q)===-1) continue;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${safe(h.date)}</td>
+          <td>${safe(h.action)}</td>
+          <td>${safe(h.champ)}</td>
+          <td>${safe(h.avant)}</td>
+          <td>${safe(h.apres)}</td>
+          <td><button class="btn danger" onclick="deleteHistoryRow(${rev})">X</button></td>
+        `;
+        body.appendChild(tr);
+      }
+    }
+
+    // ===== Export CSV (Excel) ===== (Excel) =====
+    function csvEscape(value){
+      const s = safe(value);
+      if(/[\n\r\t",;]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+      return s;
+    }
+
+    function exportCSV(rows, filename){
+      if(!rows || !rows.length) return;
+      const headers = Object.keys(rows[0]);
+      const lines = [headers.join(',')];
+      rows.forEach(r => lines.push(headers.map(h => csvEscape(r[h])).join(',')));
+      const csv = lines.join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = filename;
+      a.click();
+    }
+
+    // ===== Render all =====
+    function renderAll(){
+      renderARC();
+      renderPOOL();
+      renderDrivers();
+      rebuildDriversDatalist();
+      if (typeof renderWeekly === 'function') renderWeekly();
+      renderOnboarding();
+      renderStats();
+      renderReminders();
+      renderLabelHistory();
+      renderHistory();
+    }
+
+    // ===== Tests (basic smoke tests) =====
+    function runTests(){
+      const results = [];
+      const assert = (name, cond) => results.push({name, ok: !!cond});
+
+      // Functions must exist
+      assert('showTab defined', typeof window.showTab === 'function');
+      assert('addARC defined', typeof window.addARC === 'function');
+      assert('renderOnboarding defined', typeof window.renderOnboarding === 'function');
+      assert('printSheet8 defined', typeof window.printSheet8 === 'function');
+      assert('renderDrivers defined', typeof window.renderDrivers === 'function');
+      assert('addDriver defined', typeof window.addDriver === 'function');
+      assert('addWeeklyRow defined', typeof window.addWeeklyRow === 'function');
+
+      // Data arrays are arrays
+      assert('arcData is array', Array.isArray(arcData));
+      assert('poolData is array', Array.isArray(poolData));
+      assert('weeklyRows is array', Array.isArray(weeklyRows));
+      assert('weeklyData legacy is array', Array.isArray(weeklyData));
+      assert('onboardingData is array', Array.isArray(onboardingData));
+
+      // Render should not throw
+      try { renderAll(); assert('renderAll no throw', true); } catch(e){ assert('renderAll no throw', false); console.error(e); }
+
+      // Report in console
+      const failed = results.filter(r=>!r.ok);
+      if(failed.length){
+        console.warn('❌ Tests failed:', failed);
+      } else {
+        
+      }
+    }
+
+    // Init
+    applySettings();
+    hydrateSettingsForm();
+    if($('arc_sort') && !$('arc_sort').value) $('arc_sort').value='date_desc';
+    if($('qr_format')) {
+      $('qr_format').addEventListener('change', (e)=>applyLabelFormat(e.target.value));
+      applyLabelFormat($('qr_format').value || '140x55');
+    }
+    renderAll();
+    runTests();
+
+    window.addEventListener('resize', ()=>moveNavIndicator());
+    setTimeout(()=>moveNavIndicator(), 0);
+    document.querySelectorAll('nav button[data-tab]').forEach(function(btn){ btn.type='button'; });
+
+    pullServerState(false);
+    setInterval(function(){
+      if(!syncInProgress) pullServerState(true);
+    }, 45000);
+
+    // Expose some internals for debugging if needed
+    window.__data = () => ({arcData, poolData, driversData, weeklyRows, weeklyData, onboardingData, historyLog, manualReminders, settings, lastServerSync});
+
+  })();
+  </script>
+
+
+<script>
+/* === Suivi BU V3 — propre, responsive, sanctions personnalisables === */
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const DATA_KEY = 'bu_data_v3';
+  const OLD_KEY = 'bu_data';
+  const SETTINGS_KEY = 'bu_settings_v3';
+  const SANCTIONS_KEY = 'bu_driver_sanctions_v3';
+  let currentView = 'ranking';
+  let settings = loadJSON(SETTINGS_KEY, { warn:2, danger:3, defaultSanction:'Interdiction de site 72h', ruleText:'3 BU sur une même semaine = sanction personnalisable' });
+  let customSanctions = loadJSON(SANCTIONS_KEY, {});
+  let data = normalizeData(loadJSON(DATA_KEY, null) || loadJSON(OLD_KEY, []));
+
+  function loadJSON(key, fallback){ try{ const raw=localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; } }
+  function saveData(){ localStorage.setItem(DATA_KEY, JSON.stringify(data)); }
+  function saveSettingsOnly(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+  function saveSanctions(){ localStorage.setItem(SANCTIONS_KEY, JSON.stringify(customSanctions)); }
+  function today(){ const d=new Date(); const local=new Date(d.getTime()-d.getTimezoneOffset()*60000); return local.toISOString().slice(0,10); }
+  function esc(str=''){ return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function normalizeData(items){ return (Array.isArray(items)?items:[]).map((e,i)=>({ id:String(e.id || ('bu_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,8))), recoit:String(e.recoit||'').trim(), fait:String(e.fait||'').trim(), date:String(e.date||today()).slice(0,10), reason:String(e.reason||'').trim(), note:String(e.note||'').trim() })).filter(e=>e.recoit && e.fait && e.date); }
+  function formatDate(dateStr){ if(!dateStr) return '—'; const [y,m,d]=dateStr.split('-'); return `${d}/${m}/${y}`; }
+  function getISOWeek(dateStr){ const d=new Date(dateStr+'T12:00:00'); d.setHours(0,0,0,0); d.setDate(d.getDate()+4-(d.getDay()||7)); const yearStart=new Date(d.getFullYear(),0,1); return Math.ceil((((d-yearStart)/86400000)+1)/7); }
+  function weekLabel(dateStr){ const d=new Date(dateStr+'T12:00:00'); d.setDate(d.getDate()+4-(d.getDay()||7)); return `S${String(getISOWeek(dateStr)).padStart(2,'0')}-${d.getFullYear()}`; }
+  function isThisWeek(dateStr){ const now=new Date(); const d=new Date(now); const day=d.getDay()||7; d.setHours(0,0,0,0); d.setDate(d.getDate()-day+1); const start=new Date(d); const end=new Date(d); end.setDate(end.getDate()+6); end.setHours(23,59,59,999); const cur=new Date(dateStr+'T12:00:00'); return cur>=start && cur<=end; }
+  function isThisMonth(dateStr){ const n=new Date(), d=new Date(dateStr+'T12:00:00'); return d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear(); }
+  function isThisYear(dateStr){ const n=new Date(), d=new Date(dateStr+'T12:00:00'); return d.getFullYear()===n.getFullYear(); }
+  function status(max){ if(max >= Number(settings.danger||3)) return 'danger'; if(max >= Number(settings.warn||2)) return 'warn'; return 'ok'; }
+  function statusLabel(s){ return s==='danger'?'À sanctionner':s==='warn'?'À surveiller':'OK'; }
+  function statusBadge(s){ return `<span class="bu-badge ${s}">${statusLabel(s)}</span>`; }
+  function sanctionKey(name, week){ return `${name}__${week}`.toLowerCase(); }
+  function sanctionValue(name, week){ return customSanctions[sanctionKey(name, week)] || settings.defaultSanction || 'Interdiction de site 72h'; }
+
+  function clearBUForm(){ ['bu_f_recoit','bu_f_fait','bu_f_note'].forEach(id=>{ if($(id)) $(id).value=''; }); if($('bu_f_reason')) $('bu_f_reason').value=''; if($('bu_f_date')) $('bu_f_date').value=today(); updateCount(); }
+  function addBU(){
+    const recoit=($('bu_f_recoit')?.value||'').trim(), fait=($('bu_f_fait')?.value||'').trim(), date=$('bu_f_date')?.value||today(), reason=($('bu_f_reason')?.value||'').trim(), note=($('bu_f_note')?.value||'').trim();
+    if(!recoit || !fait){ alert('Remplis les deux noms de chauffeurs.'); return; }
+    if(recoit.toLowerCase()===fait.toLowerCase()){ alert('Le chauffeur ne peut pas se faire BU lui-même.'); return; }
+    const dupe=data.some(e=>e.recoit.toLowerCase()===recoit.toLowerCase() && e.fait.toLowerCase()===fait.toLowerCase() && e.date===date && e.note.toLowerCase()===note.toLowerCase() && e.reason.toLowerCase()===reason.toLowerCase());
+    if(dupe && !confirm('Ce BU existe déjà. Tu veux quand même l’ajouter ?')) return;
+    data.unshift({id:'bu_'+Date.now()+'_'+Math.random().toString(36).slice(2,8), recoit, fait, date, reason, note});
+    saveData(); clearBUForm(); renderBU(); if(window.toast) window.toast('BU enregistré', 'ok');
+  }
+  function deleteBU(id){ if(!confirm('Supprimer ce BU ?')) return; data=data.filter(e=>e.id!==String(id)); saveData(); renderBU(); }
+  function clearAllBU(){ if(!confirm('Supprimer toutes les données BU ?')) return; data=[]; customSanctions={}; saveData(); saveSanctions(); renderBU(); }
+
+  function saveBUSettings(){
+    settings.warn = Math.max(1, Number($('bu_set_warn')?.value || 2));
+    settings.danger = Math.max(settings.warn, Number($('bu_set_danger')?.value || 3));
+    settings.defaultSanction = $('bu_set_default_sanction')?.value || 'Interdiction de site 72h';
+    settings.ruleText = ($('bu_set_rule_text')?.value || '').trim() || `${settings.danger} BU sur une même semaine = ${settings.defaultSanction}`;
+    saveSettingsOnly(); hydrateSettings(); renderBU(); if(window.toast) window.toast('Règles BU enregistrées', 'ok');
+  }
+  function hydrateSettings(){ if($('bu_set_warn')) $('bu_set_warn').value=settings.warn; if($('bu_set_danger')) $('bu_set_danger').value=settings.danger; if($('bu_set_default_sanction')) $('bu_set_default_sanction').value=settings.defaultSanction; if($('bu_set_rule_text')) $('bu_set_rule_text').value=settings.ruleText; }
+  function setDriverSanction(name, week, val){ customSanctions[sanctionKey(name, week)] = val; saveSanctions(); buildReport(filteredData()); if(window.toast) window.toast('Sanction modifiée', 'ok'); }
+
+  function filteredData(){
+    const period=$('bu_filter_period')?.value||'week', driver=($('bu_filter_driver')?.value||'').toLowerCase().trim(), st=$('bu_filter_status')?.value||'all', from=$('bu_filter_from')?.value, to=$('bu_filter_to')?.value;
+    return data.filter(e=>{
+      let ok = period==='all' || (period==='week' && isThisWeek(e.date)) || (period==='month' && isThisMonth(e.date)) || (period==='year' && isThisYear(e.date)) || period==='custom';
+      if(period==='custom'){ if(from && e.date < from) ok=false; if(to && e.date > to) ok=false; }
+      if(!ok) return false;
+      if(driver && !(e.recoit.toLowerCase().includes(driver) || e.fait.toLowerCase().includes(driver) || (e.note||'').toLowerCase().includes(driver))) return false;
+      if(st==='all') return true;
+      return status(driverWeekCount(e.recoit, weekLabel(e.date)))===st;
+    }).sort((a,b)=>b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  }
+  function buildMap(source){ const map={}; source.forEach(e=>{ if(!map[e.recoit]) map[e.recoit]={total:0,semaines:{},faitPar:{},notes:[]}; const i=map[e.recoit]; i.total++; const wk=weekLabel(e.date); i.semaines[wk]=(i.semaines[wk]||0)+1; i.faitPar[e.fait]=(i.faitPar[e.fait]||0)+1; if(e.note || e.reason) i.notes.push([e.reason,e.note].filter(Boolean).join(' — ')); }); return map; }
+  function doneMap(source){ const map={}; source.forEach(e=>map[e.fait]=(map[e.fait]||0)+1); return map; }
+  function helperRows(){
+    const driver=($('bu_filter_driver')?.value||'').toLowerCase().trim();
+    const names=[...new Set(data.map(e=>e.fait).filter(Boolean))]
+      .filter(name=>!driver || name.toLowerCase().includes(driver));
+    return names.map(name=>{
+      const rows=data.filter(e=>e.fait===name);
+      const week=rows.filter(e=>isThisWeek(e.date)).length;
+      const month=rows.filter(e=>isThisMonth(e.date)).length;
+      const year=rows.filter(e=>isThisYear(e.date)).length;
+      const total=rows.length;
+      const impacted={}; rows.forEach(e=>impacted[e.recoit]=(impacted[e.recoit]||0)+1);
+      const topImpacted=Object.entries(impacted).sort((a,b)=>b[1]-a[1])[0];
+      return {name, week, month, year, total, topImpacted};
+    }).sort((a,b)=>b.week-a.week||b.month-a.month||b.year-a.year||b.total-a.total||a.name.localeCompare(b.name,'fr'));
+  }
+  function renderHelpers(){
+    const el=$('bu_helpers_grid'); if(!el) return;
+    const rows=helperRows();
+    if(!rows.length){ el.innerHTML='<div class="bu-helper-empty">Aucun chauffeur n’a fait de BU pour le moment.</div>'; return; }
+    el.innerHTML=rows.map((x,i)=>`<div class="bu-helper-card ${i===0?'top':''}">
+      <div class="bu-helper-count">${x.week}</div>
+      <div class="bu-helper-name">${esc(x.name)}</div>
+      <div class="bu-helper-meta">${x.topImpacted?`A le plus aidé : <b>${esc(x.topImpacted[0])}</b> (${x.topImpacted[1]}x)`:'Aucun détail'}<br>Total enregistré : <b>${x.total}</b> BU fait(s)</div>
+      <div class="bu-helper-stats">
+        <div class="bu-helper-mini"><strong>${x.week}</strong><span>Semaine</span></div>
+        <div class="bu-helper-mini"><strong>${x.month}</strong><span>Mois</span></div>
+        <div class="bu-helper-mini"><strong>${x.year}</strong><span>Année</span></div>
+      </div>
+    </div>`).join('');
+  }
+  function driverWeekCount(name, wk){ return data.filter(e=>e.recoit===name && weekLabel(e.date)===wk).length; }
+
+  function renderStats(fd){
+    const map=buildMap(fd), drivers=Object.keys(map), done=doneMap(fd);
+    const maxWeek=drivers.length?Math.max(...drivers.map(n=>Math.max(...Object.values(map[n].semaines)))):0;
+    const danger=drivers.filter(n=>status(Math.max(...Object.values(map[n].semaines)))==='danger').length;
+    const warn=drivers.filter(n=>status(Math.max(...Object.values(map[n].semaines)))==='warn').length;
+    const top=drivers.map(n=>({n,total:map[n].total,max:Math.max(...Object.values(map[n].semaines))})).sort((a,b)=>b.max-a.max||b.total-a.total)[0];
+    const best=Object.entries(done).sort((a,b)=>b[1]-a[1])[0];
+    $('bu_stats').innerHTML = `
+      <div class="bu-kpi"><small>Total BU</small><strong>${fd.length}</strong><div class="sub">Filtre actif</div></div>
+      <div class="bu-kpi"><small>Chauffeurs impactés</small><strong>${drivers.length}</strong><div class="sub">Ont reçu au moins 1 BU</div></div>
+      <div class="bu-kpi warn"><small>À surveiller</small><strong>${warn}</strong><div class="sub">Seuil : ${settings.warn} BU</div></div>
+      <div class="bu-kpi danger"><small>À sanctionner</small><strong>${danger}</strong><div class="sub">Seuil : ${settings.danger} BU</div></div>
+      <div class="bu-kpi"><small>Plus impacté</small><strong style="font-size:22px;line-height:1.15">${top?esc(top.n):'—'}</strong><div class="sub">Max semaine : ${top?top.max:0}</div></div>
+      <div class="bu-kpi ok"><small>Plus de BU faits</small><strong style="font-size:22px;line-height:1.15">${best?esc(best[0]):'—'}</strong><div class="sub">${best?best[1]:0} BU effectué(s)</div></div>`;
+  }
+  function renderSanctions(fd){
+    const map=buildMap(fd); const items=Object.entries(map).map(([name,info])=>{ const weeks=Object.entries(info.semaines).sort((a,b)=>b[1]-a[1]); return {name,info,weeks,max:weeks[0]?.[1]||0,wk:weeks[0]?.[0]||''}; }).filter(x=>x.max>=settings.danger).sort((a,b)=>b.max-a.max||b.info.total-a.info.total);
+    const alert=$('bu_alert_box'); alert.classList.toggle('danger', !!items.length); alert.textContent = items.length ? `${items.length} chauffeur(s) à sanctionner. Tu peux modifier la sanction directement ci-dessous.` : 'Aucune sanction automatique sur la période filtrée.';
+    const box=$('bu_sanction_list');
+    if(!items.length){ box.innerHTML = `<div class="bu-empty">Aucun chauffeur à sanctionner avec le filtre actuel.<br><small>Règle : ${esc(settings.ruleText)}</small></div>`; return; }
+    box.innerHTML = items.map(x=>{
+      const weeks=x.weeks.map(([wk,v])=>`${wk}: ${v}`).join(' · '); const val=sanctionValue(x.name,x.wk);
+      return `<div class="bu-sanction-card"><div class="bu-sanction-top"><div><div class="bu-sanction-name">${esc(x.name)}</div><div class="bu-sanction-meta">${esc(weeks)}<br>Total période : ${x.info.total} BU</div></div><span class="bu-badge danger">${x.max} BU</span></div><div class="bu-sanction-edit"><select onchange="setDriverSanction('${esc(x.name)}','${esc(x.wk)}',this.value)">${['Avertissement écrit','Interdiction de site 24h','Interdiction de site 72h','Retrait de route','Offboard','Autre'].map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select><input value="${esc(val)}" placeholder="Sanction personnalisée" onblur="setDriverSanction('${esc(x.name)}','${esc(x.wk)}',this.value)"></div></div>`;
+    }).join('');
+  }
+  function renderRanking(fd){
+    const map=buildMap(fd), sort=$('bu_sort_ranking')?.value||'week_desc'; let entries=Object.entries(map).map(([name,info])=>({name,info,max:Math.max(...Object.values(info.semaines))}));
+    entries.sort((a,b)=> sort==='alpha_asc'?a.name.localeCompare(b.name,'fr'):sort==='total_desc'?b.info.total-a.info.total||b.max-a.max:b.max-a.max||b.info.total-a.info.total);
+    const el=$('bu_ranking_grid'); if(!entries.length){ el.innerHTML='<div class="bu-empty">Aucun BU enregistré pour cette période.</div>'; return; }
+    el.innerHTML=entries.map(x=>{ const st=status(x.max); const helpers=Object.entries(x.info.faitPar).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${esc(k)} (${v}x)`).join(', '); const weeks=Object.entries(x.info.semaines).sort((a,b)=>b[1]-a[1]).map(([wk,v])=>`<span class="bu-week">${esc(wk)} : ${v}</span>`).join(' '); return `<div class="bu-rank-card ${st}"><div class="bu-rank-count">${x.info.total}</div><div class="bu-rank-name">${esc(x.name)}</div><div class="bu-rank-meta">BU faits par : ${helpers||'—'}</div><div class="bu-badges">${statusBadge(st)}<span class="bu-badge neutral">Max semaine : ${x.max}</span></div><div class="bu-badges">${weeks}</div></div>`; }).join('');
+  }
+  function renderHistory(fd){ const body=$('bu_log_body'); if(!fd.length){ body.innerHTML='<tr><td colspan="8" class="bu-empty">Aucun BU enregistré.</td></tr>'; return; } body.innerHTML=fd.map(e=>{ const wk=weekLabel(e.date), count=driverWeekCount(e.recoit,wk), st=status(count), comment=[e.reason,e.note].filter(Boolean).join(' — ')||'—'; return `<tr><td>${formatDate(e.date)}</td><td><strong>${esc(e.recoit)}</strong></td><td>${esc(e.fait)}</td><td><span class="bu-week">${esc(wk)}</span></td><td>${count} BU</td><td>${statusBadge(st)}</td><td>${esc(comment)}</td><td><button class="bu-btn danger" style="min-height:34px;padding:7px 10px" data-delete-id="${esc(e.id)}">Supprimer</button></td></tr>`; }).join(''); }
+  function renderDatalists(){ const all=[...new Set(data.flatMap(e=>[e.recoit,e.fait]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'fr')); const opts=all.map(n=>`<option value="${esc(n)}"></option>`).join(''); if($('bu_dl_drivers')) $('bu_dl_drivers').innerHTML=opts; if($('bu_dl_drivers2')) $('bu_dl_drivers2').innerHTML=opts; }
+  function buildReport(fd){
+    const map=buildMap(fd); const drivers=Object.entries(map).map(([name,info])=>({name,total:info.total,max:Math.max(...Object.values(info.semaines)), weeks:info.semaines, status:status(Math.max(...Object.values(info.semaines)))})).sort((a,b)=>b.max-a.max||b.total-a.total);
+    const danger=drivers.filter(x=>x.status==='danger'), warn=drivers.filter(x=>x.status==='warn'), period=$('bu_filter_period')?.value||'week';
+    const label=period==='week'?'cette semaine':period==='month'?'ce mois':period==='year'?'cette année':period==='custom'?'dates personnalisées':'tout';
+    let lines=['Résumé Suivi BU',`Période filtrée : ${label}`,`Règle : ${settings.ruleText}`,`Total BU : ${fd.length}`,`Chauffeurs impactés : ${drivers.length}`,`À sanctionner : ${danger.length}`,`À surveiller : ${warn.length}`];
+    if(danger.length){ lines.push('\nChauffeurs à sanctionner :'); danger.forEach(x=>{ const topWeek=Object.entries(x.weeks).sort((a,b)=>b[1]-a[1])[0]?.[0]||''; lines.push(`- ${x.name} : max ${x.max} BU/semaine, total ${x.total} — sanction : ${sanctionValue(x.name, topWeek)}`); }); }
+    if(warn.length){ lines.push('\nChauffeurs à surveiller :'); warn.forEach(x=>lines.push(`- ${x.name} : max ${x.max} BU/semaine, total ${x.total}`)); }
+    const helpers=helperRows().slice(0,5);
+    if(helpers.length){ lines.push('\nChauffeurs qui ont fait des BU :'); helpers.forEach(x=>lines.push(`- ${x.name} : ${x.week} cette semaine / ${x.month} ce mois / ${x.year} cette année`)); }
+    if(!drivers.length) lines.push('\nAucune donnée sur cette période.'); $('bu_report').textContent=lines.join('\n');
+  }
+  function renderBU(){ const fd=filteredData(); renderStats(fd); renderSanctions(fd); renderRanking(fd); renderHistory(fd); renderHelpers(); renderDatalists(); buildReport(fd); toggleView(currentView); }
+  function toggleView(view){ currentView=view; $('bu_ranking_view')?.classList.toggle('hide', view!=='ranking'); $('bu_history_view')?.classList.toggle('hide', view!=='history'); $('bu_btn_ranking')?.classList.toggle('active', view==='ranking'); $('bu_btn_history')?.classList.toggle('active', view==='history'); }
+  function resetBUFilters(){ if($('bu_filter_period')) $('bu_filter_period').value='week'; ['bu_filter_from','bu_filter_to','bu_filter_driver'].forEach(id=>{ if($(id)) $(id).value=''; }); if($('bu_filter_status')) $('bu_filter_status').value='all'; if($('bu_sort_ranking')) $('bu_sort_ranking').value='week_desc'; renderBU(); }
+  function exportBUCSV(){ const fd=filteredData(); if(!fd.length){ alert('Aucune donnée à exporter.'); return; } const rows=[['Date','Chauffeur BU reçu','Fait par','Semaine','Total semaine','Statut','Sanction','Commentaire']].concat(fd.map(e=>{ const wk=weekLabel(e.date), count=driverWeekCount(e.recoit,wk), st=status(count); return [e.date,e.recoit,e.fait,wk,count,statusLabel(st),st==='danger'?sanctionValue(e.recoit,wk):'', [e.reason,e.note].filter(Boolean).join(' — ')]; })); downloadBlob(rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(';')).join('\n'), `BU_DAR9_${today()}.csv`, 'text/csv;charset=utf-8;'); }
+  function exportBUHelpersCSV(){
+    const rows=[['Chauffeur qui fait le BU','BU cette semaine','BU ce mois','BU cette année','Total BU faits','Chauffeur le plus aidé']].concat(helperRows().map(x=>[x.name,x.week,x.month,x.year,x.total,x.topImpacted?`${x.topImpacted[0]} (${x.topImpacted[1]}x)`:'' ]));
+    if(rows.length<=1){ alert('Aucune donnée à exporter.'); return; }
+    downloadBlob(rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(';')).join('\n'), `BU_AIDES_CHAUFFEURS_${today()}.csv`, 'text/csv;charset=utf-8;');
+  }
+  function exportBUJSON(){ downloadBlob(JSON.stringify(data,null,2), `BU_DAR9_${today()}.json`, 'application/json'); }
+  function downloadBlob(content,fileName,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=fileName; a.click(); URL.revokeObjectURL(url); }
+  async function importBUJSON(event){ const file=event.target.files&&event.target.files[0]; if(!file) return; try{ const imported=normalizeData(JSON.parse(await file.text())); if(!imported.length){ alert('Fichier vide ou invalide.'); return; } const seen=new Set(); data=imported.concat(data).filter(e=>{ const key=[e.recoit,e.fait,e.date,e.reason,e.note].join('|').toLowerCase(); if(seen.has(key)) return false; seen.add(key); return true; }); saveData(); renderBU(); alert('Import terminé.'); }catch(e){ alert('Import impossible : JSON invalide.'); } finally{ event.target.value=''; } }
+  function copyBUReport(){ const txt=$('bu_report')?.textContent||''; if(!txt.trim()) return; if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>window.toast?window.toast('Résumé copié','ok'):alert('Résumé copié')); else alert(txt); }
+  function updateCount(){ const n=($('bu_f_note')?.value||'').length; if($('bu_note_count')) $('bu_note_count').textContent=`${n} / 200`; }
+
+  document.addEventListener('click', e=>{ const btn=e.target.closest('[data-delete-id]'); if(btn) deleteBU(btn.getAttribute('data-delete-id')); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target && e.target.closest('.bu-scope') && !['TEXTAREA','SELECT','BUTTON'].includes(e.target.tagName)){ e.preventDefault(); addBU(); } });
+  document.addEventListener('DOMContentLoaded', ()=>{ hydrateSettings(); clearBUForm(); if($('bu_json_import')) $('bu_json_import').addEventListener('change', importBUJSON); if($('bu_f_note')) $('bu_f_note').addEventListener('input', updateCount); renderBU(); });
+  setTimeout(()=>{ hydrateSettings(); clearBUForm(); if($('bu_json_import')) $('bu_json_import').addEventListener('change', importBUJSON); if($('bu_f_note')) $('bu_f_note').addEventListener('input', updateCount); renderBU(); },0);
+
+  window.addBU=addBU; window.clearBUForm=clearBUForm; window.clearAllBU=clearAllBU; window.renderBU=renderBU; window.resetBUFilters=resetBUFilters; window.toggleView=toggleView; window.exportBUCSV=exportBUCSV; window.exportBUJSON=exportBUJSON; window.copyBUReport=copyBUReport; window.saveBUSettings=saveBUSettings; window.setDriverSanction=setDriverSanction; window.exportBUHelpersCSV=exportBUHelpersCSV;
+})();
+</script>
+
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- Global search overlay -->
+<div class="search-overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-label="Recherche globale">
+  <div class="search-box">
+    <input class="search-input" id="searchInput" type="search" placeholder="Rechercher dans tout le site… (chauffeurs, BU, ARC, plaques)" autocomplete="off" spellcheck="false" />
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> naviguer · <kbd>Enter</kbd> ouvrir · <kbd>Esc</kbd> fermer</span>
+      <span><kbd>Ctrl</kbd>+<kbd>K</kbd> pour rouvrir</span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* === Améliorations 2026 — toasts, thème, raccourcis, recherche === */
+(function(){
+  // --- Toast system ---
+  function toast(msg, kind){
+    kind = kind || 'info';
+    var stack = document.getElementById('toastStack');
+    if(!stack) return;
+    var el = document.createElement('div');
+    el.className = 'toast ' + kind;
+    el.innerHTML = '<span>' + (msg||'') + '</span>';
+    stack.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    setTimeout(function(){
+      el.classList.remove('show');
+      setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 350);
+    }, 3000);
+  }
+  window.toast = toast;
+
+  // --- Theme toggle ---
+  var THEME_KEY = 'fde_theme';
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    var btn = document.querySelector('.theme-toggle .theme-label');
+    if(btn) btn.textContent = (t === 'dark') ? 'Mode clair' : 'Mode sombre';
+  }
+  function toggleTheme(){
+    var cur = document.documentElement.getAttribute('data-theme') || 'light';
+    var next = cur === 'dark' ? 'light' : 'dark';
+    try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+    applyTheme(next);
+    toast('Thème : ' + (next === 'dark' ? 'sombre' : 'clair'), 'info');
+  }
+  // inject toggle into header
+  document.addEventListener('DOMContentLoaded', function(){
+    var hdr = document.querySelector('header');
+    if(hdr && !hdr.querySelector('.theme-toggle')){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'theme-toggle';
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span class="theme-label">Mode sombre</span>';
+      b.addEventListener('click', toggleTheme);
+      hdr.appendChild(b);
+    }
+    var saved = 'light';
+    try{ saved = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+    applyTheme(saved);
+  });
+
+  // --- Keyboard shortcuts ---
+  function shortcutTab(idx){
+    var btns = document.querySelectorAll('nav button[data-tab]');
+    if(btns[idx-1]) btns[idx-1].click();
+  }
+  document.addEventListener('keydown', function(e){
+    // Alt+1..9 -> switch tab
+    if(e.altKey && !e.ctrlKey && !e.metaKey && /^[1-9]$/.test(e.key)){
+      e.preventDefault();
+      shortcutTab(parseInt(e.key, 10));
+    }
+    // Ctrl/Cmd + K -> open search
+    if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
+      e.preventDefault();
+      openSearch();
+    }
+    if(e.key === 'Escape'){ closeSearch(); }
+  });
+
+  // --- Global search (best-effort across known data) ---
+  var overlay, input, results;
+  function buildSearchIndex(){
+    var idx = [];
+    function safe(fn){ try{ return fn(); }catch(e){ return []; } }
+    // Try to read from window-level state (set by main app)
+    var data = (typeof window.__data === 'function') ? safe(window.__data) : {};
+    (data.driversData || []).forEach(function(d){
+      idx.push({label:(d.firstName||'')+' '+(d.lastName||''), sub:'Chauffeur · '+(d.matricule||d.email||'')+'', tab:'drivers'});
+    });
+    (data.arcData || []).forEach(function(a){
+      idx.push({label:(a.driver||a.name||'ARC')+' — '+(a.plate||a.vehicule||''), sub:'ARC · '+(a.date||''), tab:'arc'});
+    });
+    (data.poolData || []).forEach(function(p){
+      idx.push({label:(p.plate||p.matricule||'Pool')+' — '+(p.driver||''), sub:'Pool · '+(p.date||''), tab:'pool'});
+    });
+    (data.onboardingData || []).forEach(function(o){
+      idx.push({label:(o.firstName||'')+' '+(o.lastName||''), sub:'Onboarding · '+(o.date||''), tab:'onboarding'});
+    });
+    (data.weeklyRows || []).forEach(function(w){
+      idx.push({label:w.driver||w.label||'Reminder', sub:'Rappel · '+(w.date||''), tab:'reminders'});
+    });
+    return idx;
+  }
+  function openSearch(){
+    overlay = overlay || document.getElementById('searchOverlay');
+    input = input || document.getElementById('searchInput');
+    results = results || document.getElementById('searchResults');
+    if(!overlay) return;
+    overlay.classList.add('show');
+    input.value = '';
+    renderSearch('');
+    setTimeout(function(){ input.focus(); }, 50);
+  }
+  function closeSearch(){
+    if(overlay) overlay.classList.remove('show');
+  }
+  var searchFocusIdx = 0;
+  function renderSearch(q){
+    if(!results) return;
+    var allItems = buildSearchIndex();
+    q = (q||'').toLowerCase().trim();
+    var filtered = q
+      ? allItems.filter(function(x){ return (x.label||'').toLowerCase().indexOf(q) >= 0 || (x.sub||'').toLowerCase().indexOf(q) >= 0; })
+      : allItems.slice(0, 12);
+    if(!filtered.length){
+      results.innerHTML = '<div class="search-item"><div><strong>Aucun résultat</strong><br><small>Tape au moins 2 caractères ou ouvre directement un onglet (Alt+1..9).</small></div></div>';
+      return;
+    }
+    searchFocusIdx = 0;
+    results.innerHTML = filtered.slice(0, 30).map(function(x, i){
+      return '<div class="search-item' + (i===0?' focus':'') + '" data-tab="'+x.tab+'"><div><strong>'+escapeHTML(x.label)+'</strong><br><small>'+escapeHTML(x.sub)+'</small></div><span>↗</span></div>';
+    }).join('');
+    Array.prototype.forEach.call(results.querySelectorAll('.search-item'), function(el){
+      el.addEventListener('click', function(){
+        var t = el.getAttribute('data-tab');
+        if(t && typeof window.showTab === 'function'){
+          var btn = document.querySelector('nav button[data-tab="'+t+'"]');
+          if(btn){ window.showTab(t, btn); }
+        }
+        closeSearch();
+      });
+    });
+  }
+  function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  document.addEventListener('DOMContentLoaded', function(){
+    var i = document.getElementById('searchInput');
+    if(i){
+      i.addEventListener('input', function(){ renderSearch(i.value); });
+      i.addEventListener('keydown', function(e){
+        var items = document.querySelectorAll('#searchResults .search-item');
+        if(!items.length) return;
+        if(e.key === 'ArrowDown'){ e.preventDefault(); items[searchFocusIdx]?.classList.remove('focus'); searchFocusIdx = (searchFocusIdx+1) % items.length; items[searchFocusIdx].classList.add('focus'); items[searchFocusIdx].scrollIntoView({block:'nearest'}); }
+        if(e.key === 'ArrowUp'){ e.preventDefault(); items[searchFocusIdx]?.classList.remove('focus'); searchFocusIdx = (searchFocusIdx-1+items.length) % items.length; items[searchFocusIdx].classList.add('focus'); items[searchFocusIdx].scrollIntoView({block:'nearest'}); }
+        if(e.key === 'Enter'){ items[searchFocusIdx]?.click(); }
+      });
+    }
+    var ov = document.getElementById('searchOverlay');
+    if(ov){
+      ov.addEventListener('click', function(e){ if(e.target === ov) closeSearch(); });
+    }
+  });
+
+  // --- Hint toast on first load ---
+  setTimeout(function(){
+    try{
+      if(!localStorage.getItem('fde_hint_v1')){
+        toast('Astuce : Ctrl+K pour la recherche · Alt+1..9 pour les onglets', 'info');
+        localStorage.setItem('fde_hint_v1', '1');
+      }
+    }catch(e){}
+  }, 1200);
+})();
+</script>
+
+</body>
+</html>
